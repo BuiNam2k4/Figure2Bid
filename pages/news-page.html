@@ -1,0 +1,338 @@
+<!doctype html>
+
+<html class="light" lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Tin tức | Figure2Bid</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              surface: "#f9f9ff",
+              "surface-container-low": "#f0f3ff",
+              background: "#f9f9ff",
+              "inverse-primary": "#ffb3ae",
+              "inverse-surface": "#263142",
+              "on-secondary": "#ffffff",
+              "secondary-container": "#6991fe",
+              "on-secondary-fixed-variant": "#003fa5",
+              "tertiary-container": "#936f00",
+              "inverse-on-surface": "#ebf1ff",
+              primary: "#b81120",
+              tertiary: "#755800",
+              "surface-container-highest": "#d8e3fa",
+              "surface-container-high": "#dee8ff",
+              "on-primary-container": "#fffbff",
+              "on-primary": "#ffffff",
+              "on-secondary-container": "#002972",
+              "secondary-fixed": "#dbe1ff",
+              "on-tertiary-fixed-variant": "#5a4300",
+              "tertiary-fixed": "#ffdf9a",
+              "surface-variant": "#d8e3fa",
+              "on-surface-variant": "#5b403e",
+              "primary-container": "#dc3135",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#ffdad7",
+              "on-background": "#111c2c",
+              "surface-dim": "#cfdaf1",
+              "surface-tint": "#bb1522",
+              "on-surface": "#111c2c",
+              "on-tertiary-container": "#fffbff",
+              "primary-fixed-dim": "#ffb3ae",
+              "on-primary-fixed": "#410004",
+              "surface-container": "#e7eeff",
+              "surface-bright": "#f9f9ff",
+              error: "#ba1a1a",
+              "on-primary-fixed-variant": "#930014",
+              "secondary-fixed-dim": "#b3c5ff",
+              "outline-variant": "#e4bdba",
+              "tertiary-fixed-dim": "#f8be00",
+              secondary: "#2958c2",
+              outline: "#906f6d",
+              "on-error": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-error-container": "#93000a",
+              "surface-container-lowest": "#ffffff",
+              "on-secondary-fixed": "#00184a",
+              "on-tertiary-fixed": "#251a00",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            fontFamily: {
+              headline: ["Be Vietnam Pro"],
+              body: ["Be Vietnam Pro"],
+              label: ["Be Vietnam Pro"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+    </style>
+  </head>
+  <body class="bg-surface text-on-surface font-body">
+    <site-header></site-header>
+
+    <main class="pt-24 pb-20 px-6 max-w-[1440px] mx-auto">
+      <section class="mb-14">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <article
+            class="lg:col-span-8 rounded-2xl overflow-hidden bg-on-background text-white relative"
+          >
+            <img
+              alt="Tin nổi bật"
+              class="w-full h-[420px] object-cover opacity-65"
+              src="../images/hero.gif"
+            />
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"
+            ></div>
+            <div class="absolute left-8 right-8 bottom-8 space-y-4">
+              <span
+                class="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] font-bold bg-primary/85 px-3 py-1 rounded-full"
+              >
+                <span class="material-symbols-outlined text-sm">newspaper</span>
+                Tin Nổi Bật
+              </span>
+              <h1
+                class="font-headline text-3xl md:text-5xl font-bold leading-tight"
+              >
+                Toàn cảnh thị trường figure quý hiếm quý II/2026
+              </h1>
+              <p class="text-white/85 text-lg">
+                Tổng hợp xu hướng đấu giá, nhóm sản phẩm tăng giá mạnh và chiến
+                lược ra giá dành cho nhà sưu tầm mới.
+              </p>
+            </div>
+          </article>
+
+          <aside class="lg:col-span-4 space-y-4">
+            <div
+              class="rounded-2xl bg-surface-container-low p-6 border border-surface-container-high"
+            >
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-secondary mb-3"
+              >
+                Chuyên mục
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <span
+                  class="px-3 py-1 rounded-full bg-surface-container-high text-xs font-semibold"
+                  >Thị trường</span
+                >
+                <span
+                  class="px-3 py-1 rounded-full bg-surface-container-high text-xs font-semibold"
+                  >Sự kiện</span
+                >
+                <span
+                  class="px-3 py-1 rounded-full bg-surface-container-high text-xs font-semibold"
+                  >Mẹo đấu giá</span
+                >
+                <span
+                  class="px-3 py-1 rounded-full bg-surface-container-high text-xs font-semibold"
+                  >Bảo quản figure</span
+                >
+              </div>
+            </div>
+            <div
+              class="rounded-2xl bg-surface-container-lowest p-6 border border-outline-variant/40"
+            >
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-primary mb-3"
+              >
+                Cập nhật mới
+              </p>
+              <ul class="space-y-3 text-sm text-on-surface-variant">
+                <li>09:00 - Lịch mở 5 phiên đấu giá hiếm tuần này</li>
+                <li>11:30 - Top figure tăng giá mạnh nhất tháng</li>
+                <li>14:15 - Cảnh báo hàng giả theo series phổ biến</li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section>
+        <div class="flex items-end justify-between mb-8">
+          <h2 class="font-headline text-3xl font-bold">Tin Tức Mới Nhất</h2>
+          <a
+            class="text-secondary font-bold hover:underline"
+            href="explore-page.html"
+            >Xem phiên đấu giá</a
+          >
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <article
+            class="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/30 hover:shadow-xl transition-shadow"
+          >
+            <img
+              alt="Bài viết 1"
+              class="w-full h-52 object-cover"
+              src="../images/img3.jpg"
+            />
+            <div class="p-5 space-y-3">
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-primary"
+              >
+                Phân tích
+              </p>
+              <h3 class="font-headline text-xl font-bold">
+                Steins;Gate figure phiên bản giới hạn: Vì sao tăng giá?
+              </h3>
+              <p class="text-sm text-on-surface-variant">
+                Phân tích độ hiếm, nhà phát hành, phiên bản và thanh khoản trên
+                thị trường thứ cấp.
+              </p>
+            </div>
+          </article>
+
+          <article
+            class="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/30 hover:shadow-xl transition-shadow"
+          >
+            <img
+              alt="Bài viết 2"
+              class="w-full h-52 object-cover"
+              src="../images/img4.jpg"
+            />
+            <div class="p-5 space-y-3">
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-secondary"
+              >
+                Series Hot
+              </p>
+              <h3 class="font-headline text-xl font-bold">
+                Bộ truyện manga nào đang được săn nhiều nhất?
+              </h3>
+              <p class="text-sm text-on-surface-variant">
+                Top các bản in đầu và boxset được trả giá cao trong 30 ngày gần
+                nhất.
+              </p>
+            </div>
+          </article>
+
+          <article
+            class="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/30 hover:shadow-xl transition-shadow"
+          >
+            <img
+              alt="Bài viết 3"
+              class="w-full h-52 object-cover"
+              src="../images/img1.webp"
+            />
+            <div class="p-5 space-y-3">
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-tertiary"
+              >
+                Sự kiện
+              </p>
+              <h3 class="font-headline text-xl font-bold">
+                Lịch công bố card/figure Evangelion tháng này
+              </h3>
+              <p class="text-sm text-on-surface-variant">
+                Các mốc phát hành mới từ Bandai, Good Smile và những phiên
+                collab đáng chú ý.
+              </p>
+            </div>
+          </article>
+
+          <article
+            class="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/30 hover:shadow-xl transition-shadow"
+          >
+            <img
+              alt="Bài viết 4"
+              class="w-full h-52 object-cover"
+              src="../images/img2.jpeg"
+            />
+            <div class="p-5 space-y-3">
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-primary"
+              >
+                Nhà sưu tầm
+              </p>
+              <h3 class="font-headline text-xl font-bold">
+                5 lỗi thường gặp khi chụp ảnh sản phẩm đem đấu giá
+              </h3>
+              <p class="text-sm text-on-surface-variant">
+                Cách setup ánh sáng và bố cục để tăng độ tin cậy khi đăng bán.
+              </p>
+            </div>
+          </article>
+
+          <article
+            class="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/30 hover:shadow-xl transition-shadow"
+          >
+            <img
+              alt="Bài viết 5"
+              class="w-full h-52 object-cover"
+              src="../images/img1.jpg"
+            />
+            <div class="p-5 space-y-3">
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-secondary"
+              >
+                Thị trường
+              </p>
+              <h3 class="font-headline text-xl font-bold">
+                Diễn biến giá figure EVA trong nửa đầu năm 2026
+              </h3>
+              <p class="text-sm text-on-surface-variant">
+                So sánh mức chốt giá theo phiên bản và tình trạng seal để ra giá
+                hợp lý hơn.
+              </p>
+            </div>
+          </article>
+
+          <article
+            class="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/30 hover:shadow-xl transition-shadow"
+          >
+            <img
+              alt="Bài viết 6"
+              class="w-full h-52 object-cover"
+              src="../images/photo-1-15612676190041302758248.webp"
+            />
+            <div class="p-5 space-y-3">
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-tertiary"
+              >
+                Kinh nghiệm
+              </p>
+              <h3 class="font-headline text-xl font-bold">
+                Chiến lược đặt bid cuối phiên để tối đa cơ hội thắng
+              </h3>
+              <p class="text-sm text-on-surface-variant">
+                Gợi ý setup cảnh báo, bước giá và thời điểm vào lệnh trong 3
+                phút cuối.
+              </p>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <site-footer></site-footer>
+    <script src="../components/shared-layout.js"></script>
+  </body>
+</html>

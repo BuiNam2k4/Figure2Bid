@@ -1,0 +1,455 @@
+<!doctype html>
+
+<html class="light" lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "surface-variant": "#d8e3fa",
+              "on-tertiary": "#ffffff",
+              "on-secondary": "#ffffff",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#936f00",
+              secondary: "#2958c2",
+              "surface-dim": "#cfdaf1",
+              "on-secondary-container": "#002972",
+              "on-error": "#ffffff",
+              "on-secondary-fixed": "#00184a",
+              "on-secondary-fixed-variant": "#003fa5",
+              "surface-container-low": "#f0f3ff",
+              "primary-container": "#dc3135",
+              "inverse-primary": "#ffb3ae",
+              "inverse-on-surface": "#ebf1ff",
+              "tertiary-fixed-dim": "#f8be00",
+              "on-primary-container": "#fffbff",
+              "surface-container-lowest": "#ffffff",
+              "on-surface": "#111c2c",
+              "on-primary": "#ffffff",
+              "secondary-container": "#6991fe",
+              "on-tertiary-fixed": "#251a00",
+              "on-tertiary-container": "#fffbff",
+              primary: "#b81120",
+              "secondary-fixed-dim": "#b3c5ff",
+              "tertiary-fixed": "#ffdf9a",
+              surface: "#f9f9ff",
+              "secondary-fixed": "#dbe1ff",
+              "surface-bright": "#f9f9ff",
+              tertiary: "#755800",
+              "surface-container": "#e7eeff",
+              "outline-variant": "#e4bdba",
+              "surface-tint": "#bb1522",
+              "on-surface-variant": "#5b403e",
+              "inverse-surface": "#263142",
+              background: "#f9f9ff",
+              "on-primary-fixed": "#410004",
+              outline: "#906f6d",
+              "on-background": "#111c2c",
+              "on-tertiary-fixed-variant": "#5a4300",
+              "on-error-container": "#93000a",
+              "surface-container-highest": "#d8e3fa",
+              "on-primary-fixed-variant": "#930014",
+              "primary-fixed-dim": "#ffb3ae",
+              error: "#ba1a1a",
+              "surface-container-high": "#dee8ff",
+              "primary-fixed": "#ffdad7",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "1rem",
+              xl: "1.5rem",
+              full: "9999px",
+            },
+            fontFamily: {
+              headline: ["Be Vietnam Pro"],
+              body: ["Be Vietnam Pro"],
+              label: ["Be Vietnam Pro"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        color: #ea97ea;
+      }
+      .no-line {
+        border: none !important;
+      }
+      .tonal-shift {
+        background-color: rgba(240, 243, 255, 0.8);
+      }
+    </style>
+  </head>
+  <body class="bg-background font-body text-on-surface">
+    <site-header></site-header>
+    <main class="pt-32 pb-20 px-6 max-w-[1440px] mx-auto min-h-screen">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div class="lg:col-span-8 space-y-8">
+          <div class="flex items-center justify-between px-2 mb-4">
+            <span class="font-headline font-bold text-lg"
+              >2 vật phẩm đã giữ chỗ</span
+            >
+            <span class="text-on-surface-variant font-label text-sm"
+              >Xem lại phiên đã thắng</span
+            >
+          </div>
+          <div
+            class="group relative bg-surface-container-lowest rounded-xl p-6 transition-all duration-300 hover:translate-y-[-4px] flex flex-col md:flex-row gap-8 items-center overflow-hidden"
+          >
+            <div
+              class="w-full md:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0"
+            >
+              <img
+                alt="Gundam MGEX 1/100"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                data-alt="high-detail studio photograph of a premium master grade gundam model kit with mechanical internal frame details visible"
+                src="../images/img1.jpg"
+              />
+            </div>
+            <div class="flex-grow space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span
+                    class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter mb-2"
+                    >Chờ thanh toán</span
+                  >
+                  <h3 class="font-headline text-2xl font-bold">
+                    Gundam MGEX 1/100
+                  </h3>
+                  <p class="text-on-surface-variant text-sm font-label">
+                    Unicorn Gundam Ver.Ka - Ultra Detail Series
+                  </p>
+                </div>
+                <span
+                  class="material-symbols-outlined text-slate-300 hover:text-error cursor-pointer transition-colors"
+                  >delete</span
+                >
+              </div>
+              <div class="flex items-center gap-6 pt-4">
+                <div class="space-y-1">
+                  <p
+                    class="text-[10px] uppercase text-slate-400 font-label tracking-widest"
+                  >
+                    Giá thắng
+                  </p>
+                  <p class="font-headline text-2xl font-bold text-primary">
+                    ¥24,500
+                  </p>
+                </div>
+                <div class="h-10 w-[1px] bg-surface-container"></div>
+                <div class="space-y-1">
+                  <p
+                    class="text-[10px] uppercase text-slate-400 font-label tracking-widest"
+                  >
+                    Mã phiên đấu
+                  </p>
+                  <p class="font-label font-medium">#AK-99212</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="group relative bg-surface-container-lowest rounded-xl p-6 transition-all duration-300 hover:translate-y-[-4px] flex flex-col md:flex-row gap-8 items-center overflow-hidden"
+          >
+            <div
+              class="w-full md:w-48 h-48 rounded-lg overflow-hidden flex-shrink-0"
+            >
+              <img
+                alt="Berserk Deluxe Edition"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                data-alt="dark atmospheric shot of a thick black leather-bound deluxe manga volume with red foil stamping on a marble surface"
+                src="../images/img4.jpg"
+              />
+            </div>
+            <div class="flex-grow space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span
+                    class="inline-block bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter mb-2"
+                    >Chờ thanh toán</span
+                  >
+                  <h3 class="font-headline text-2xl font-bold">
+                    Berserk Deluxe Edition
+                  </h3>
+                  <p class="text-on-surface-variant text-sm font-label">
+                    Volumes 1-3 Hardcover Collection - Dark Horse
+                  </p>
+                </div>
+                <span
+                  class="material-symbols-outlined text-slate-300 hover:text-error cursor-pointer transition-colors"
+                  >delete</span
+                >
+              </div>
+              <div class="flex items-center gap-6 pt-4">
+                <div class="space-y-1">
+                  <p
+                    class="text-[10px] uppercase text-slate-400 font-label tracking-widest"
+                  >
+                    Giá thắng
+                  </p>
+                  <p class="font-headline text-2xl font-bold text-primary">
+                    ¥12,800
+                  </p>
+                </div>
+                <div class="h-10 w-[1px] bg-surface-container"></div>
+                <div class="space-y-1">
+                  <p
+                    class="text-[10px] uppercase text-slate-400 font-label tracking-widest"
+                  >
+                    Mã phiên đấu
+                  </p>
+                  <p class="font-label font-medium">#AK-10452</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <aside class="lg:col-span-4">
+          <div class="sticky top-32 space-y-6">
+            <div
+              class="bg-surface-container-low rounded-xl p-8 border border-surface-container-high"
+            >
+              <h2 class="font-headline text-xl font-bold mb-6">
+                Tóm tắt thanh toán
+              </h2>
+              <div class="space-y-4 mb-8">
+                <div class="flex justify-between text-on-surface-variant">
+                  <span class="font-label">Tổng tiền thắng đấu</span>
+                  <span class="font-headline font-bold">¥37,300</span>
+                </div>
+                <div class="flex justify-between text-on-surface-variant">
+                  <span class="font-label"
+                    >Vận chuyển bảo hiểm (đường hàng không)</span
+                  >
+                  <span class="font-headline font-bold">¥4,200</span>
+                </div>
+                <div class="flex justify-between text-on-surface-variant">
+                  <span class="font-label">Phí dịch vụ nền tảng</span>
+                  <span class="font-headline font-bold">¥1,865</span>
+                </div>
+                <div
+                  class="pt-4 border-t border-surface-container-high flex justify-between items-center"
+                >
+                  <span class="font-headline text-lg font-bold"
+                    >Tổng đơn hàng</span
+                  >
+                  <span class="font-headline text-3xl font-bold text-primary"
+                    >¥43,365</span
+                  >
+                </div>
+              </div>
+              <button
+                class="w-full py-4 rounded-lg bg-gradient-to-r from-primary to-primary-container text-white font-headline font-bold text-lg flex items-center justify-center gap-3 hover:opacity-90 active:scale-95 transition-all"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >lock</span
+                >
+                Thanh toán an toàn
+              </button>
+              <div class="mt-6 flex flex-col gap-3">
+                <div
+                  class="flex items-center gap-2 text-[10px] text-slate-500 font-label uppercase tracking-widest"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >verified_user</span
+                  >
+                  Xác thực đảm bảo
+                </div>
+                <div
+                  class="flex items-center gap-2 text-[10px] text-slate-500 font-label uppercase tracking-widest"
+                >
+                  <span class="material-symbols-outlined text-sm"
+                    >local_shipping</span
+                  >
+                  Vận chuyển kho toàn cầu
+                </div>
+              </div>
+            </div>
+            <div
+              class="bg-secondary/5 rounded-xl p-6 border border-secondary/10 flex items-center gap-4"
+            >
+              <div
+                class="w-12 h-12 rounded-full bg-secondary flex items-center justify-center text-white"
+              >
+                <span class="material-symbols-outlined">redeem</span>
+              </div>
+              <div>
+                <p class="font-headline font-bold text-secondary">
+                  Ưu đãi hạng Elite
+                </p>
+                <p class="text-xs text-secondary/80 font-label">
+                  Đã áp dụng hạng sưu tầm: giảm 5% phí vận chuyển.
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <section class="mt-32">
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <h2 class="font-headline text-3xl font-bold tracking-tight">
+              Gợi ý cho bạn
+            </h2>
+            <p class="text-on-surface-variant font-label text-sm mt-1">
+              Đề xuất theo lịch sử sưu tầm của bạn
+            </p>
+          </div>
+          <a
+            class="text-primary font-headline font-bold flex items-center gap-2 group"
+            href="#"
+          >
+            Xem thêm phiên đấu
+            <span
+              class="material-symbols-outlined group-hover:translate-x-1 transition-transform"
+              >arrow_forward</span
+            >
+          </a>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div class="group cursor-pointer">
+            <div
+              class="aspect-[4/5] bg-surface-container rounded-lg overflow-hidden relative mb-4"
+            >
+              <img
+                alt="Collectible Item"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="dramatic macro shot of a limited edition anime character figure with intricate paintwork and metallic finish"
+                src="../images/img1.webp"
+              />
+              <div
+                class="absolute top-4 left-4 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full"
+              >
+                <span
+                  class="text-[10px] font-black text-primary font-headline uppercase"
+                  >Đang đấu giá</span
+                >
+              </div>
+            </div>
+            <h4
+              class="font-headline font-bold text-lg group-hover:text-primary transition-colors"
+            >
+              Evangelion Unit-01 Chrome
+            </h4>
+            <p class="text-secondary font-headline font-bold">
+              Giá hiện tại: ¥52,000
+            </p>
+            <p class="text-xs text-slate-400 font-label mt-1">Còn lại 2h 45m</p>
+          </div>
+          <div class="group cursor-pointer">
+            <div
+              class="aspect-[4/5] bg-surface-container rounded-lg overflow-hidden relative mb-4"
+            >
+              <img
+                alt="Collectible Item"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="a stack of vintage rare manga volumes with yellowed edges showing authentic age and character"
+                src="../images/photo-1-15612676190041302758248.webp"
+              />
+              <div
+                class="absolute top-4 left-4 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full"
+              >
+                <span
+                  class="text-[10px] font-black text-secondary font-headline uppercase"
+                  >Hàng hiếm</span
+                >
+              </div>
+            </div>
+            <h4
+              class="font-headline font-bold text-lg group-hover:text-primary transition-colors"
+            >
+              Akira Original Press Set
+            </h4>
+            <p class="text-secondary font-headline font-bold">
+              Giá hiện tại: ¥118,500
+            </p>
+            <p class="text-xs text-slate-400 font-label mt-1">
+              Còn lại 14h 22m
+            </p>
+          </div>
+          <div class="group cursor-pointer">
+            <div
+              class="aspect-[4/5] bg-surface-container rounded-lg overflow-hidden relative mb-4"
+            >
+              <img
+                alt="Collectible Item"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="abstract artistic render of a neon cyberpunk city street in anime style with vibrant colors and light trails"
+                src="../images/img3.jpg"
+              />
+              <div
+                class="absolute top-4 left-4 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full"
+              >
+                <span
+                  class="text-[10px] font-black text-primary font-headline uppercase"
+                  >Mở bán trực tiếp</span
+                >
+              </div>
+            </div>
+            <h4
+              class="font-headline font-bold text-lg group-hover:text-primary transition-colors"
+            >
+              Neo-Tokyo Art Print #44
+            </h4>
+            <p class="text-secondary font-headline font-bold">
+              Mua ngay: ¥8,900
+            </p>
+            <p class="text-xs text-slate-400 font-label mt-1">
+              Giới hạn: 10/100
+            </p>
+          </div>
+          <div class="group cursor-pointer">
+            <div
+              class="aspect-[4/5] bg-surface-container rounded-lg overflow-hidden relative mb-4"
+            >
+              <img
+                alt="Collectible Item"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                data-alt="close up of a professional high-end art supply set for manga illustration with markers and fine-liners on a white desk"
+                src="../images/img2.jpeg"
+              />
+              <div
+                class="absolute top-4 left-4 bg-white/80 backdrop-blur-md px-3 py-1 rounded-full"
+              >
+                <span
+                  class="text-[10px] font-black text-slate-500 font-headline uppercase"
+                  >Thiết yếu</span
+                >
+              </div>
+            </div>
+            <h4
+              class="font-headline font-bold text-lg group-hover:text-primary transition-colors"
+            >
+              Copic Manga Artist Set
+            </h4>
+            <p class="text-secondary font-headline font-bold">Giá: ¥15,400</p>
+            <p class="text-xs text-slate-400 font-label mt-1">Còn hàng</p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <site-footer></site-footer>
+    <script src="../components/shared-layout.js"></script>
+  </body>
+</html>
