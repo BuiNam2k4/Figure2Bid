@@ -112,7 +112,7 @@ function SiteHeader() {
         <Link className="flex items-center" to={APP_ROUTES.home}>
           <img
             className="h-10 md:h-14 w-auto object-contain origin-left md:scale-150"
-            src="./images/logo_ping1.png"
+            src="/images/logo_ping1.png"
             alt="Figure2Bid"
           />
         </Link>
