@@ -1,22 +1,34 @@
-# FigureAuction - Stitch to HTML Tailwind
+# FigureAuction - React + Vite
 
-Converted from Stitch project: `projects/12845594959473496694`.
+Project duoc chuyen tu bo giao dien HTML/CSS tinh sang ung dung React + Vite.
 
-## Structure
+## Scripts
 
-- `index.html` - navigation hub for all pages
-- `pages/landing-page.html`
-- `pages/home-page.html`
-- `pages/explore-page.html`
-- `pages/auction-detail-page.html`
-- `pages/cart-page.html`
-- `pages/dashboard-page.html`
-- `pages/login-page.html`
-- `pages/register-page.html`
-- `pages/auction-flow-page.html`
+- `npm run dev`: Chay moi truong phat trien
+- `npm run build`: Build production
+- `npm run preview`: Xem ban build local
 
-## Run
+## Route Mapping
 
-Open `index.html` in your browser, then navigate to each page.
+- `/`: Trang chu chinh (chuyen tu `index.html`)
+- `/home`: `home-page.html`
+- `/landing`: `landing-page.html`
+- `/explore`: `explore-page.html`
+- `/news`: `news-page.html`
+- `/dashboard`: `dashboard-page.html`
+- `/auction-detail`: `auction-detail-page.html`
+- `/cart`: `cart-page.html`
+- `/sell`: `sell-auction-page.html`
+- `/login`: `login-page.html`
+- `/register`: `register-page.html`
 
-All pages are pure HTML and use Tailwind via CDN script.
+## Migration Notes
+
+- Toan bo HTML trong `pages/` duoc giu lai va render qua React component.
+- CSS noi tuyen tu tung trang duoc nap dong trong runtime.
+- Link `.html` cu duoc map sang route React de di chuyen khong reload.
+- Header/Footer da duoc viet lai thanh component React.
+
+## Assets
+
+- Anh va tai nguyen tinh duoc copy sang `public/images` va `public/sound`.

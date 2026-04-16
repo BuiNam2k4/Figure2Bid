@@ -1,0 +1,770 @@
+<!doctype html>
+
+<html class="light" lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Figure2Bid-Sàn săn waifu, figure</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800;900&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-error": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "primary-fixed": "#ffdad7",
+              outline: "#906f6d",
+              "surface-tint": "#bb1522",
+              "tertiary-container": "#936f00",
+              "on-primary-fixed": "#410004",
+              "inverse-on-surface": "#ebf1ff",
+              "tertiary-fixed-dim": "#f8be00",
+              "surface-bright": "#f9f9ff",
+              "on-surface-variant": "#5b403e",
+              "on-secondary-fixed": "#00184a",
+              "primary-container": "#dc3135",
+              "surface-container-low": "#f0f3ff",
+              "secondary-fixed": "#dbe1ff",
+              "on-tertiary-container": "#fffbff",
+              "on-primary-container": "#fffbff",
+              "inverse-surface": "#263142",
+              "surface-dim": "#cfdaf1",
+              "surface-container-high": "#dee8ff",
+              "on-secondary-container": "#002972",
+              tertiary: "#755800",
+              "inverse-primary": "#ffb3ae",
+              "on-tertiary-fixed-variant": "#5a4300",
+              "on-secondary": "#ffffff",
+              surface: "#f9f9ff",
+              "on-tertiary": "#ffffff",
+              "on-surface": "#111c2c",
+              "on-tertiary-fixed": "#251a00",
+              "on-error-container": "#93000a",
+              secondary: "#2958c2",
+              "outline-variant": "#e4bdba",
+              "error-container": "#ffdad6",
+              "surface-variant": "#d8e3fa",
+              "secondary-fixed-dim": "#b3c5ff",
+              "surface-container-highest": "#d8e3fa",
+              "on-primary": "#ffffff",
+              "tertiary-fixed": "#ffdf9a",
+              primary: "#b81120",
+              error: "#ba1a1a",
+              "secondary-container": "#6991fe",
+              "on-primary-fixed-variant": "#930014",
+              "primary-fixed-dim": "#ffb3ae",
+              "on-background": "#111c2c",
+              "on-secondary-fixed-variant": "#003fa5",
+              background: "#f9f9ff",
+              "surface-container": "#e7eeff",
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "0.75rem",
+              full: "9999px",
+            },
+            fontFamily: {
+              headline: ["Be Vietnam Pro"],
+              body: ["Be Vietnam Pro"],
+              label: ["Be Vietnam Pro"],
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: "Be Vietnam Pro", sans-serif;
+      }
+      .font-headline {
+        font-family: "Be Vietnam Pro", sans-serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+      }
+      .tonal-shift-bottom {
+        box-shadow: 0 10px 30px -10px rgba(184, 17, 32, 0.05);
+      }
+      .tonal-layering-top {
+        border-top: 1px solid rgba(228, 189, 186, 0.15);
+      }
+      .hero-title {
+        font-family: "Be Vietnam Pro", sans-serif;
+        font-weight: 900;
+        text-shadow:
+          0 3px 14px rgba(0, 0, 0, 0.42),
+          0 1px 2px rgba(0, 0, 0, 0.4);
+      }
+      .hero-copy {
+        font-family: "Be Vietnam Pro", sans-serif;
+        text-shadow:
+          0 2px 10px rgba(0, 0, 0, 0.38),
+          0 1px 1px rgba(0, 0, 0, 0.28);
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        .scroll-motion [data-scroll-section] {
+          opacity: 0;
+          transform: translate3d(0, 48px, 0) scale(0.985);
+          filter: saturate(85%);
+          transition:
+            opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            transform 700ms cubic-bezier(0.16, 1, 0.3, 1),
+            filter 700ms cubic-bezier(0.16, 1, 0.3, 1);
+          transition-delay: var(--section-delay, 0ms);
+          will-change: transform, opacity, filter;
+        }
+        .scroll-motion [data-scroll-section].is-visible {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
+          filter: saturate(100%);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background text-on-background selection:bg-primary selection:text-white overflow-x-hidden"
+  >
+    <!-- TopNavBar -->
+    <site-header></site-header>
+    <main class="pt-24 md:pt-16">
+      <!-- Hero Section -->
+      <section
+        class="relative px-8 pt-0 pb-20 max-w-screen-2xl mx-auto"
+        data-scroll-section
+      >
+        <div class="relative min-h-[680px] rounded-3xl overflow-hidden">
+          <img
+            class="absolute inset-0 w-full h-full object-cover"
+            src="./images/hero.gif"
+            alt="Hero artwork"
+          />
+          <div
+            class="absolute inset-0 bg-gradient-to-b from-black/15 via-black/35 to-black/55 pointer-events-none"
+          ></div>
+          <div
+            class="relative z-10 min-h-[680px] flex items-center justify-center px-6 md:px-12"
+          >
+            <div class="space-y-8 max-w-4xl text-center p-8 md:p-12">
+              <div
+                class="inline-flex items-center px-4 py-1 rounded-full bg-surface-container-highest text-primary font-bold text-xs uppercase tracking-widest mx-auto"
+              >
+                Trực tiếp từ 36
+              </div>
+              <h1
+                class="hero-title text-5xl mb-3 md:text-8xl leading-[0.9] tracking-tighter text-white"
+              >
+                Đấu giá
+                <span class="text-primary italic">Figure Real Time</span>
+                ngay bây giờ!
+              </h1>
+              <p
+                class="hero-copy text-xl text-white/95 max-w-2xl mx-auto leading-relaxed"
+              >
+                Sàn thương mại đấu giá sản phẩm văn hóa 2D Đầu tiên tại Việt
+                Nam!
+              </p>
+              <div class="flex flex-wrap gap-4 pt-4 justify-center">
+                <a
+                  class="px-8 py-4 bg-gradient-to-br from-primary to-primary-container text-white rounded-lg font-headline font-bold text-lg shadow-2xl shadow-primary/30 hover:shadow-primary/40 transition-all flex items-center gap-2"
+                  href="pages/auction-detail-page.html"
+                >
+                  Vào phiên đấu giá
+                  <span class="material-symbols-outlined">trending_up</span>
+                </a>
+                <a
+                  class="px-8 py-4 bg-surface-container-low text-secondary border border-secondary/15 rounded-lg font-headline font-bold text-lg hover:bg-surface-container-high transition-all"
+                  href="#cach-thuc-dau-gia"
+                >
+                  Cách thức đấu giá
+                </a>
+                <a
+                  class="px-8 py-4 bg-white/90 text-primary border border-white rounded-lg font-headline font-bold text-lg hover:bg-white transition-all flex items-center gap-2"
+                  href="pages/sell-auction-page.html"
+                >
+                  Đăng bán sản phẩm
+                  <span class="material-symbols-outlined">add_box</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Auction Flow -->
+      <section
+        id="cach-thuc-dau-gia"
+        class="px-8 py-20 max-w-screen-2xl mx-auto scroll-mt-28"
+        data-scroll-section
+      >
+        <div
+          class="rounded-3xl bg-gradient-to-br from-surface-container to-surface-container-high p-8 md:p-12"
+        >
+          <div
+            class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10"
+          >
+            <div class="space-y-3">
+              <p
+                class="text-xs uppercase tracking-[0.2em] font-bold text-primary"
+              >
+                Cách thức đấu giá
+              </p>
+              <h2
+                class="text-4xl md:text-5xl font-headline font-bold tracking-tight"
+              >
+                4 bước tham gia phiên đấu giá
+              </h2>
+              <p class="text-on-surface-variant max-w-2xl leading-relaxed">
+                Quy trình được tối ưu để bạn có thể đặt giá nhanh, an toàn và
+                minh bạch từ lúc đăng ký đến khi nhận hàng.
+              </p>
+            </div>
+            <a
+              class="inline-flex items-center gap-2 text-secondary font-bold hover:underline"
+              href="pages/register-page.html"
+            >
+              Bắt đầu ngay
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <article
+              class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/40 space-y-4"
+            >
+              <div
+                class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined">person_add</span>
+              </div>
+              <p
+                class="text-xs font-bold uppercase tracking-[0.2em] text-primary"
+              >
+                Bước 1
+              </p>
+              <h3 class="text-xl font-headline font-bold">Tạo tài khoản</h3>
+              <p class="text-on-surface-variant leading-relaxed text-sm">
+                Đăng ký nhanh và hoàn tất xác thực để mở quyền tham gia các
+                phiên đấu giá hiếm.
+              </p>
+            </article>
+            <article
+              class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/40 space-y-4"
+            >
+              <div
+                class="w-11 h-11 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined">inventory_2</span>
+              </div>
+              <p
+                class="text-xs font-bold uppercase tracking-[0.2em] text-secondary"
+              >
+                Bước 2
+              </p>
+              <h3 class="text-xl font-headline font-bold">Chọn vật phẩm</h3>
+              <p class="text-on-surface-variant leading-relaxed text-sm">
+                Theo dõi mô tả, lịch sử giá và thời gian còn lại trước khi quyết
+                định đặt giá đầu tiên.
+              </p>
+            </article>
+            <article
+              class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/40 space-y-4"
+            >
+              <div
+                class="w-11 h-11 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined">gavel</span>
+              </div>
+              <p
+                class="text-xs font-bold uppercase tracking-[0.2em] text-tertiary"
+              >
+                Bước 3
+              </p>
+              <h3 class="text-xl font-headline font-bold">Đấu giá trực tiếp</h3>
+              <p class="text-on-surface-variant leading-relaxed text-sm">
+                Đặt mức giá phù hợp theo thời gian thực. Giá cao nhất khi phiên
+                kết thúc sẽ là người thắng cuộc.
+              </p>
+            </article>
+            <article
+              class="bg-surface-container-lowest rounded-2xl p-6 border border-outline-variant/40 space-y-4"
+            >
+              <div
+                class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
+              >
+                <span class="material-symbols-outlined">local_shipping</span>
+              </div>
+              <p
+                class="text-xs font-bold uppercase tracking-[0.2em] text-primary"
+              >
+                Bước 4
+              </p>
+              <h3 class="text-xl font-headline font-bold">
+                Thanh toán & nhận hàng
+              </h3>
+              <p class="text-on-surface-variant leading-relaxed text-sm">
+                Hoàn tất thanh toán bảo mật và chọn giao tận nơi hoặc lưu kho
+                cao cấp tại Tokyo.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+      <!-- Quick Navigation -->
+      <section class="px-8 py-12 max-w-screen-2xl mx-auto" data-scroll-section>
+        <div class="rounded-2xl bg-surface-container p-8">
+          <div
+            class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6"
+          >
+            <div>
+              <p
+                class="text-xs uppercase tracking-widest font-bold text-primary"
+              >
+                Điều hướng nhanh
+              </p>
+              <h2 class="text-3xl font-headline font-bold">
+                Toàn bộ page theo luồng
+              </h2>
+            </div>
+            <a
+              class="text-secondary font-bold hover:underline"
+              href="pages/home-page.html"
+              >Đi đến trang chủ marketplace</a
+            >
+          </div>
+          <div
+            class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 text-sm"
+          >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="index.html"
+              >Trang đích</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/home-page.html"
+              >Trang chủ</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/explore-page.html"
+              >Khám phá figure</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/auction-detail-page.html"
+              >Chi tiết đấu giá</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/cart-page.html"
+              >Giỏ hàng</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/dashboard-page.html"
+              >Bảng điều khiển</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/news-page.html"
+              >Tin tức</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/login-page.html"
+              >Đăng nhập</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/register-page.html"
+              >Đăng ký</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="#cach-thuc-dau-gia"
+              >Luồng đấu giá</a
+            >
+            <a
+              class="rounded-lg bg-surface-container-lowest px-4 py-3 font-semibold hover:bg-primary hover:text-white transition-colors"
+              href="pages/sell-auction-page.html"
+              >Đăng bán đấu giá</a
+            >
+          </div>
+        </div>
+      </section>
+      <!-- Value Props (Bento Grid) -->
+      <section class="px-8 py-20 bg-surface-container-low" data-scroll-section>
+        <div class="max-w-screen-2xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div
+              class="bg-surface-container-lowest p-10 rounded-xl space-y-4 hover:translate-y-[-4px] transition-transform duration-300"
+            >
+              <div
+                class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >verified_user</span
+                >
+              </div>
+              <h3 class="text-2xl font-headline font-bold">
+                Xác thực chính hãng
+              </h3>
+              <p class="text-on-surface-variant leading-relaxed">
+                Mỗi vật phẩm đều được kiểm định bởi 3 chuyên gia độc lập trước
+                khi vào kho lưu trữ cao cấp.
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest p-10 rounded-xl space-y-4 hover:translate-y-[-4px] transition-transform duration-300"
+            >
+              <div
+                class="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >public</span
+                >
+              </div>
+              <h3 class="text-2xl font-headline font-bold">
+                Drop hiếm toàn cầu
+              </h3>
+              <p class="text-on-surface-variant leading-relaxed">
+                Tiếp cận trực tiếp các đợt phát hành độc quyền tại Akihabara và
+                bộ sưu tập tư nhân quý hiếm.
+              </p>
+            </div>
+            <div
+              class="bg-surface-container-lowest p-10 rounded-xl space-y-4 hover:translate-y-[-4px] transition-transform duration-300"
+            >
+              <div
+                class="w-12 h-12 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  style="font-variation-settings: &quot;FILL&quot; 1"
+                  >bolt</span
+                >
+              </div>
+              <h3 class="text-2xl font-headline font-bold">
+                Đấu giá thời gian thực
+              </h3>
+              <p class="text-on-surface-variant leading-relaxed">
+                Hệ thống đấu giá độ trễ thấp cho cạnh tranh tốc độ cao, nơi từng
+                mili giây đều có giá trị.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- Featured Collections -->
+      <section class="px-8 py-32 max-w-screen-2xl mx-auto" data-scroll-section>
+        <div
+          class="flex flex-col md:flex-row justify-between items-end mb-16 gap-4"
+        >
+          <div class="space-y-4">
+            <h2 class="text-5xl font-headline font-bold tracking-tight">
+              Bộ sưu tập <span class="text-primary italic">nổi bật</span>
+            </h2>
+            <p class="text-on-surface-variant text-lg max-w-xl">
+              Các đợt mở bán được tuyển chọn trong tuần này. Thêm ngay vào danh
+              sách theo dõi của bạn.
+            </p>
+          </div>
+          <a
+            class="text-secondary font-bold flex items-center gap-2 hover:underline"
+            href="pages/explore-page.html"
+          >
+            Xem tất cả bộ sưu tập
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+          <!-- Evangelion -->
+          <div class="group cursor-pointer">
+            <div class="relative aspect-[3/4] rounded-lg overflow-hidden mb-6">
+              <img
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                data-alt="dramatic shot of a purple mecha unit head with glowing green eyes in a dark industrial hangar with red emergency lights"
+                src="./images/img1.jpg"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"
+              ></div>
+              <div
+                class="absolute top-4 right-4 bg-primary px-3 py-1 text-white font-bold text-xs rounded uppercase tracking-tighter"
+              >
+                Mới ra mắt
+              </div>
+            </div>
+            <h4 class="text-2xl font-headline font-bold mb-2">
+              Neon Genesis Evangelion
+            </h4>
+            <p
+              class="text-sm font-label text-slate-500 uppercase tracking-widest mb-4"
+            >
+              Unit 01 Artifacts • 12 vật phẩm
+            </p>
+            <a
+              class="block w-full py-3 text-center border border-outline-variant/30 rounded-lg font-bold group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all"
+              href="pages/explore-page.html"
+            >
+              Khám phá bộ sưu tập
+            </a>
+          </div>
+          <!-- One Piece -->
+          <div class="group cursor-pointer">
+            <div class="relative aspect-[3/4] rounded-lg overflow-hidden mb-6">
+              <img
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                data-alt="vibrant aesthetic collection of pirate themed manga volumes and a golden coin on a dark wooden surface with warm atmospheric lighting"
+                src="./images/img2.jpeg"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"
+              ></div>
+            </div>
+            <h4 class="text-2xl font-headline font-bold mb-2">
+              Gotoubun: Miku Nakano
+            </h4>
+            <p
+              class="text-sm font-label text-slate-500 uppercase tracking-widest mb-4"
+            >
+              Rare Manuscript Cuttings • 8 vật phẩm
+            </p>
+            <a
+              class="block w-full py-3 text-center border border-outline-variant/30 rounded-lg font-bold group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all"
+              href="pages/explore-page.html"
+            >
+              Khám phá bộ sưu tập
+            </a>
+          </div>
+          <!-- Ghibli -->
+          <div class="group cursor-pointer">
+            <div class="relative aspect-[3/4] rounded-lg overflow-hidden mb-6">
+              <img
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                data-alt="hand-painted style artistic scene of a lush green forest with soft ethereal light filtering through leaves and a small ceramic spirit statue"
+                src="./images/img3.jpg"
+              />
+              <div
+                class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"
+              ></div>
+            </div>
+            <h4 class="text-2xl font-headline font-bold mb-2">
+              Steins;Gate Kurisu scale 1/7
+            </h4>
+            <p
+              class="text-sm font-label text-slate-500 uppercase tracking-widest mb-4"
+            >
+              Princess Mononoke Sets • 5 vật phẩm
+            </p>
+            <a
+              class="block w-full py-3 text-center border border-outline-variant/30 rounded-lg font-bold group-hover:bg-primary group-hover:text-white group-hover:border-primary transition-all"
+              href="pages/explore-page.html"
+            >
+              Khám phá bộ sưu tập
+            </a>
+          </div>
+        </div>
+      </section>
+      <!-- Community/Trust: Premium Vault -->
+      <section
+        class="px-8 py-32 bg-on-background text-white relative overflow-hidden"
+        data-scroll-section
+      >
+        <div
+          class="absolute top-0 right-0 w-1/2 h-full opacity-10 pointer-events-none"
+        >
+          <img
+            class="w-full h-full object-cover"
+            data-alt="high-tech secure server room with glowing blue led lights and futuristic hardware aesthetic"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDlSGIhtfeGdFuPr4UUFUnlhumm5mfw3ddUkHV2BJTAmWxlOsi6JqMqqeSBNKcOVAljgnfpaGscCDZmqNalhUj8-5dmqNQDkHQdqzZZSMN9y_szbzXr4VddgpbwNYopreKxqGk5okEHm5Nayxe_SEsq_roHeojt_WYgHA3khuzgXkklZP4gX0QYgl8YU1Zm4YXDmExIIiOt4agyHePDCdG8ZoJprRaL-L7IsiEA3BbWtWJQ7u57K9M9tXXHmuEBwNWzZITF7T-IR_j"
+          />
+        </div>
+        <div
+          class="max-w-screen-2xl mx-auto relative z-10 grid grid-cols-1 md:grid-cols-2 gap-20 items-center"
+        >
+          <div class="space-y-8">
+            <h2 class="text-5xl font-headline font-bold leading-tight">
+              Kho lưu trữ <span class="text-primary italic">cao cấp</span>
+            </h2>
+            <p class="text-slate-400 text-lg leading-relaxed">
+              Bảo mật không chỉ là công nghệ mà còn là gìn giữ giá trị sưu tầm.
+              Mỗi vật phẩm có thể được lưu tại kho kiểm soát khí hậu ở Tokyo
+              hoặc vận chuyển bảo hiểm tận tay.
+            </p>
+            <ul class="space-y-6">
+              <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-primary"
+                  >verified</span
+                >
+                <div>
+                  <h5 class="font-bold text-xl">Xác thực 3 lớp</h5>
+                  <p class="text-slate-500">
+                    Đối soát nguồn gốc, kiểm định vật lý và gắn thẻ NFC số.
+                  </p>
+                </div>
+              </li>
+              <li class="flex items-start gap-4">
+                <span class="material-symbols-outlined text-primary"
+                  >security</span
+                >
+                <div>
+                  <h5 class="font-bold text-xl">Ký quỹ số có bảo hiểm</h5>
+                  <p class="text-slate-500">
+                    Tiền của bạn được bảo toàn cho tới khi vật phẩm được xác
+                    minh khi nhận hàng.
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="relative">
+            <div
+              class="p-8 bg-slate-900/50 backdrop-blur-md rounded-2xl border border-white/10 shadow-2xl"
+            >
+              <div class="flex items-center gap-4 mb-8">
+                <img
+                  class="w-16 h-16 rounded-full object-cover grayscale"
+                  data-alt="portrait of a professional japanese man in a sleek modern office setting with glasses looking confident"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0VEAdenGIm8FNALfc7ONmAqME06XSIrF3yP3Oy3mvFwD8Zqwst_gOQq855FfA26CpLFXMkGT_A_WRNIP4TQKy1a2i_TGOXWOsm2GATKy89tLhdcBhmS3MeFEbUrZ7z9I0gNAYn-037apPji2flx1kkV2w3pEXtkj0AQOFLjbQlndH42ibDeAL-u8jUw5PZeEcqD9BXo55-l9M96inceQkdKOWMsq3Tu4ZeRcHay20W5SZhe7JPtK9umz0m7RRRqWdCPdy8H95_jXY"
+                />
+                <div>
+                  <p class="font-bold text-lg">Kenji Sato</p>
+                  <p class="text-slate-500 text-sm">
+                    Chuyên gia kiểm định trưởng
+                  </p>
+                </div>
+              </div>
+              <p
+                class="text-xl italic font-body leading-relaxed text-slate-300"
+              >
+                "Chúng tôi không chỉ bán figure, chúng tôi lưu giữ văn hóa 2D.
+                Mọi vật phẩm qua kho đều được đối xử như một tác phẩm nghệ thuật
+                đương đại."
+              </p>
+            </div>
+            <!-- Decorative circle -->
+            <div
+              class="absolute -bottom-12 -left-12 w-32 h-32 bg-primary opacity-20 rounded-full blur-2xl"
+            ></div>
+          </div>
+        </div>
+      </section>
+      <!-- CTA Section -->
+      <section
+        class="px-8 py-32 text-center max-w-screen-xl mx-auto"
+        data-scroll-section
+      >
+        <div class="space-y-10">
+          <h2
+            class="text-5xl md:text-7xl font-headline font-bold tracking-tighter"
+          >
+            Sẵn sàng trở thành <br /><span class="text-primary italic"
+              >nhà sưu tầm huyền thoại?</span
+            >
+          </h2>
+          <p class="text-xl text-on-surface-variant max-w-2xl mx-auto">
+            Gia nhập cộng đồng hơn 50.000 nhà sưu tầm và nhận quyền truy cập sớm
+            các đợt drop lớn từ Akihabara.
+          </p>
+          <div
+            class="flex flex-col md:flex-row items-center justify-center gap-4"
+          >
+            <a
+              class="w-full md:w-auto px-12 py-5 bg-primary text-white rounded-lg font-headline font-bold text-xl shadow-xl shadow-primary/20 hover:scale-105 transition-transform"
+              href="pages/register-page.html"
+            >
+              Tạo tài khoản
+            </a>
+            <a
+              class="w-full md:w-auto px-12 py-5 bg-transparent text-on-background border-2 border-on-background rounded-lg font-headline font-bold text-xl hover:bg-on-background hover:text-white transition-all"
+              href="./pages/explore-page.html"
+            >
+              Xem các phiên sắp mở
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- Footer -->
+    <site-footer></site-footer>
+    <script>
+      (() => {
+        document.body.classList.add("scroll-motion");
+
+        const sections = Array.from(
+          document.querySelectorAll("main > section[data-scroll-section]"),
+        );
+
+        if (!sections.length) {
+          return;
+        }
+
+        sections.forEach((section, index) => {
+          section.style.setProperty(
+            "--section-delay",
+            `${Math.min(index * 80, 320)}ms`,
+          );
+        });
+
+        const prefersReducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+          sections.forEach((section) => section.classList.add("is-visible"));
+          return;
+        }
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              entry.target.classList.toggle("is-visible", entry.isIntersecting);
+            });
+          },
+          {
+            threshold: 0.2,
+            rootMargin: "0px 0px -12% 0px",
+          },
+        );
+
+        sections.forEach((section, index) => {
+          if (index === 0) {
+            section.classList.add("is-visible");
+          }
+
+          observer.observe(section);
+        });
+      })();
+    </script>
+    <script src="components/shared-layout.js"></script>
+  </body>
+</html>
