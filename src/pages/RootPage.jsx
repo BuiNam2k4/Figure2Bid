@@ -68,7 +68,7 @@ export default function RootPage() {
   }, []);
 
   return (
-    <main ref={mainRef} className="pt-24 md:pt-16">
+    <main ref={mainRef} className="site-page-with-header-offset">
       {/* Hero Section */}
       <section
         className="relative px-8 pt-0 pb-20 max-w-screen-2xl mx-auto"
