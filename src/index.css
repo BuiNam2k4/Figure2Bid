@@ -1,5 +1,12 @@
 :root {
   color-scheme: light;
+  --site-header-offset: 96px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --site-header-offset: 116px;
+  }
 }
 
 * {
@@ -79,17 +86,30 @@ a {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  overflow: visible;
+  margin-left: -10px;
+}
+
+@media (min-width: 768px) {
+  .site-header__logo {
+    margin-left: -14px;
+  }
 }
 
 .site-header__logo-img {
   height: 42px;
   width: auto;
   object-fit: contain;
+  display: block;
+  transform: scale(1.15);
+  transform-origin: left center;
 }
 
 @media (min-width: 768px) {
   .site-header__logo-img {
     height: 52px;
+    transform: scale(2);
+    margin-right: 60px;
   }
 }
 
@@ -407,4 +427,8 @@ a.site-nav__contact-item:hover .site-nav__contact-icon {
   height: 16px;
   background: rgba(17, 28, 44, 0.1);
   flex-shrink: 0;
+}
+
+.site-page-with-header-offset {
+  padding-top: var(--site-header-offset);
 }

@@ -251,7 +251,7 @@ export default function HomePage() {
   }, [auctions]);
 
   return (
-    <main className="pt-24 pb-20">
+    <main className="site-page-with-header-offset pb-20">
       {/* Hero Section: Featured Rare Figure */}
       <section className="max-w-[1440px] mx-auto px-8 mb-24">
         <div className="relative overflow-hidden rounded-[2rem] bg-surface-container-low min-h-[600px] flex items-center">
