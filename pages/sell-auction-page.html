@@ -205,7 +205,7 @@
         <section
           class="lg:col-span-2 rounded-2xl bg-surface-container-low p-6 md:p-8"
         >
-          <form class="space-y-8" action="#" method="post">
+          <form class="space-y-8" id="legacy-sell-form">
             <div>
               <h2 class="font-headline text-3xl font-bold tracking-tight mb-2">
                 Thông tin sản phẩm
@@ -378,29 +378,17 @@
               <h3 class="font-headline text-2xl font-bold">
                 Hình ảnh sản phẩm
               </h3>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input
-                  class="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-3"
-                  name="image-url-1"
-                  placeholder="URL ảnh 1 *"
-                  required
-                  type="url"
-                />
-                <input
-                  class="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-3"
-                  name="image-url-2"
-                  placeholder="URL ảnh 2"
-                  type="url"
-                />
-                <input
-                  class="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-3"
-                  name="image-url-3"
-                  placeholder="URL ảnh 3"
-                  type="url"
-                />
-              </div>
+              <input
+                class="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-3"
+                name="image-files"
+                accept="image/*"
+                multiple
+                required
+                type="file"
+              />
               <p class="text-xs text-on-surface-variant">
-                Gợi ý: dùng ảnh tỉ lệ 4:5 hoặc 1:1, dung lượng tối ưu dưới 2MB.
+                Trang này là giao diện cũ. Khi bấm đăng, hệ thống sẽ chuyển qua
+                form React mới để tải ảnh và gửi Product API.
               </p>
             </div>
 
@@ -462,6 +450,19 @@
     </main>
 
     <site-footer></site-footer>
+    <script>
+      (function () {
+        const form = document.getElementById("legacy-sell-form");
+        if (!form) {
+          return;
+        }
+
+        form.addEventListener("submit", function (event) {
+          event.preventDefault();
+          window.location.assign("/sell");
+        });
+      })();
+    </script>
     <script src="../components/shared-layout.js"></script>
   </body>
 </html>

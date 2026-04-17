@@ -1,29 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "../utils/legacyRoutes";
+import { clearAuthSession, hasValidAccessToken } from "../utils/authStorage";
+
+const NAVBAR_HOME_ROUTE = "/home";
 
 const desktopNavItems = [
-  { label: "Trang chủ", to: APP_ROUTES.home },
+  { label: "Trang chủ", to: NAVBAR_HOME_ROUTE },
   { label: "Khám phá", to: APP_ROUTES.explore },
   { label: "Tin tức", to: APP_ROUTES.news },
   { label: "Bảng điều khiển", to: APP_ROUTES.dashboard },
 ];
 
-const mobileNavItems = [
-  { label: "Trang chủ", to: APP_ROUTES.home },
+const baseMobileNavItems = [
+  { label: "Trang chủ", to: NAVBAR_HOME_ROUTE },
   { label: "Khám phá", to: APP_ROUTES.explore },
   { label: "Tin tức", to: APP_ROUTES.news },
   { label: "Phiên đấu giá", to: APP_ROUTES.auctionDetail },
   { label: "Bảng điều khiển", to: APP_ROUTES.dashboard },
   { label: "Giỏ hàng", to: APP_ROUTES.cart },
   { label: "Đăng bán", to: APP_ROUTES.sell },
-  { label: "Đăng nhập", to: APP_ROUTES.login },
-  { label: "Đăng ký", to: APP_ROUTES.register },
   { label: "Landing page", to: APP_ROUTES.landing },
 ];
 
 const pageLabels = {
   [APP_ROUTES.home]: "Tổng quan",
+  [NAVBAR_HOME_ROUTE]: "Tổng quan",
   [APP_ROUTES.explore]: "Khám phá",
   [APP_ROUTES.news]: "Tin tức",
   [APP_ROUTES.dashboard]: "Bảng điều khiển",
@@ -36,8 +38,8 @@ const pageLabels = {
 };
 
 function isRouteActive(pathname, routePath) {
-  if (routePath === APP_ROUTES.home) {
-    return pathname === APP_ROUTES.home || pathname === "/home";
+  if (routePath === APP_ROUTES.home || routePath === NAVBAR_HOME_ROUTE) {
+    return pathname === APP_ROUTES.home || pathname === NAVBAR_HOME_ROUTE;
   }
 
   return pathname === routePath;
@@ -50,9 +52,7 @@ function DesktopNavLink({ item, pathname }) {
     <Link
       to={item.to}
       className={
-        active
-          ? "text-primary font-bold transition-colors"
-          : "text-[#111c2c] hover:text-[#b81120] transition-colors"
+        active ? "site-nav__link site-nav__link--active" : "site-nav__link"
       }
     >
       {item.label}
@@ -83,13 +83,165 @@ function MobileNavLink({ item, pathname, onNavigate }) {
   );
 }
 
+/* ════════════════════════════════════════════════════════════
+   TOP HEADER — Logo · Search · Auth buttons
+   ════════════════════════════════════════════════════════════ */
+function TopHeader({ isAuthenticated, onLogout }) {
+  return (
+    <div className="site-header__top">
+      <div className="site-header__top-inner">
+        {/* ── Logo ─────────────────────────────────────────── */}
+        <Link className="site-header__logo" to={APP_ROUTES.home}>
+          <img
+            className="site-header__logo-img"
+            src="/images/logo_ping1.png"
+            alt="Figure247"
+          />
+        </Link>
+
+        {/* ── Search Bar ───────────────────────────────────── */}
+        <div className="site-header__search">
+          <span className="material-symbols-outlined site-header__search-icon">
+            search
+          </span>
+          <input
+            className="site-header__search-input"
+            type="search"
+            placeholder="Tìm kiếm figure, phiên đấu giá..."
+            id="globalSearch"
+          />
+        </div>
+
+        {/* ── Auth Buttons ─────────────────────────────────── */}
+        <div className="site-header__actions">
+          {isAuthenticated ? (
+            <>
+              <Link
+                aria-label="Giỏ hàng"
+                className="site-header__icon-btn"
+                to={APP_ROUTES.cart}
+              >
+                <span className="material-symbols-outlined">shopping_cart</span>
+              </Link>
+              <Link className="site-header__sell-btn" to={APP_ROUTES.sell}>
+                Đăng bán
+              </Link>
+              <button
+                type="button"
+                aria-label="Đăng xuất"
+                onClick={onLogout}
+                className="site-header__icon-btn"
+              >
+                <span className="material-symbols-outlined">logout</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link className="site-header__login-btn" to={APP_ROUTES.login}>
+                <span className="material-symbols-outlined site-header__btn-icon">
+                  login
+                </span>
+                Đăng nhập
+              </Link>
+              <Link
+                className="site-header__register-btn"
+                to={APP_ROUTES.register}
+              >
+                <span className="material-symbols-outlined site-header__btn-icon">
+                  person_add
+                </span>
+                Đăng ký
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAVBAR — Navigation links · Contact info
+   ════════════════════════════════════════════════════════════ */
+function SiteNavbar({ pathname, isMobileMenuOpen, onToggleMobile }) {
+  return (
+    <div className="site-header__nav">
+      <div className="site-header__nav-inner">
+        {/* ── Mobile hamburger ─────────────────────────────── */}
+        <button
+          type="button"
+          aria-label="Mở menu điều hướng"
+          aria-expanded={isMobileMenuOpen}
+          className="site-header__hamburger"
+          onClick={onToggleMobile}
+        >
+          <span className="material-symbols-outlined">
+            {isMobileMenuOpen ? "close" : "menu"}
+          </span>
+        </button>
+
+        {/* ── Desktop Nav Links ────────────────────────────── */}
+        <nav className="site-nav__links">
+          {desktopNavItems.map((item) => (
+            <DesktopNavLink key={item.to} item={item} pathname={pathname} />
+          ))}
+        </nav>
+
+        {/* ── Contact Info ─────────────────────────────────── */}
+        <div className="site-nav__contact">
+          <a href="tel:0123456789" className="site-nav__contact-item">
+            <span className="material-symbols-outlined site-nav__contact-icon">
+              call
+            </span>
+            <span>0123 456 789</span>
+          </a>
+          <span className="site-nav__contact-divider" />
+          <a
+            href="mailto:support@figure247.com"
+            className="site-nav__contact-item"
+          >
+            <span className="material-symbols-outlined site-nav__contact-icon">
+              mail
+            </span>
+            <span>support@figure247.com</span>
+          </a>
+          <span className="site-nav__contact-divider" />
+          <span className="site-nav__contact-item site-nav__contact-item--static">
+            <span className="material-symbols-outlined site-nav__contact-icon">
+              schedule
+            </span>
+            <span>T2 – CN: 8:00 – 22:00</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   COMBINED HEADER wrapper
+   ════════════════════════════════════════════════════════════ */
 function SiteHeader() {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const isAuthenticated = hasValidAccessToken();
 
   const currentLabel = useMemo(() => {
     return pageLabels[pathname] || "Figure2Bid";
   }, [pathname]);
+
+  const mobileNavItems = useMemo(() => {
+    if (isAuthenticated) {
+      return baseMobileNavItems;
+    }
+
+    return [
+      ...baseMobileNavItems,
+      { label: "Đăng nhập", to: APP_ROUTES.login },
+      { label: "Đăng ký", to: APP_ROUTES.register },
+    ];
+  }, [isAuthenticated]);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -106,68 +258,30 @@ function SiteHeader() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const handleLogout = () => {
+    clearAuthSession();
+    setMobileMenuOpen(false);
+    navigate(APP_ROUTES.login, { replace: true });
+  };
+
   return (
-    <header className="fixed top-0 w-full z-50 bg-[#f9f9ff]/80 backdrop-blur-xl shadow-[0_20px_40px_rgba(17,28,44,0.06)]">
-      <nav className="flex items-center justify-between px-4 md:px-8 py-2 max-w-[1440px] mx-auto gap-3">
-        <Link className="flex items-center" to={APP_ROUTES.home}>
-          <img
-            className="h-10 md:h-14 w-auto object-contain origin-left md:scale-150"
-            src="/images/logo_ping1.png"
-            alt="Figure2Bid"
-          />
-        </Link>
+    <header className="site-header">
+      {/* Row 1: Header */}
+      <TopHeader isAuthenticated={isAuthenticated} onLogout={handleLogout} />
 
-        <div className="hidden md:flex items-center gap-8 font-headline tracking-tight">
-          {desktopNavItems.map((item) => (
-            <DesktopNavLink key={item.to} item={item} pathname={pathname} />
-          ))}
-        </div>
+      {/* Row 2: Navbar */}
+      <SiteNavbar
+        pathname={pathname}
+        isMobileMenuOpen={isMobileMenuOpen}
+        onToggleMobile={() => setMobileMenuOpen((c) => !c)}
+      />
 
-        <div className="flex items-center gap-1.5 sm:gap-3">
-          <Link
-            aria-label="Cart"
-            className="hidden sm:inline-flex hover:opacity-80 transition-all duration-300 scale-95 active:scale-90 text-[#111c2c]"
-            to={APP_ROUTES.cart}
-          >
-            <span className="material-symbols-outlined">shopping_cart</span>
-          </Link>
-          <Link
-            className="hidden sm:inline-flex items-center rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-semibold text-primary hover:bg-primary hover:text-white transition-colors"
-            to={APP_ROUTES.sell}
-          >
-            Đăng bán
-          </Link>
-          <Link
-            className="inline-flex items-center whitespace-nowrap rounded-lg border border-outline-variant/50 bg-surface-container-lowest px-2.5 py-2 text-xs font-semibold text-[#111c2c] hover:bg-surface-container-high transition-colors sm:px-3 sm:text-sm"
-            to={APP_ROUTES.login}
-          >
-            Đăng nhập
-          </Link>
-          <Link
-            className="inline-flex items-center whitespace-nowrap rounded-lg bg-primary px-2.5 py-2 text-xs font-semibold text-white hover:bg-primary-container transition-colors sm:px-3 sm:text-sm"
-            to={APP_ROUTES.register}
-          >
-            Đăng ký
-          </Link>
-          <button
-            type="button"
-            aria-label="Mở menu điều hướng"
-            aria-expanded={isMobileMenuOpen}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant/50 bg-surface-container-lowest text-[#111c2c] hover:bg-surface-container-high transition-colors sm:hidden"
-            onClick={() => setMobileMenuOpen((current) => !current)}
-          >
-            <span className="material-symbols-outlined text-[20px]">
-              {isMobileMenuOpen ? "close" : "menu"}
-            </span>
-          </button>
-        </div>
-      </nav>
-
+      {/* Mobile breadcrumb */}
       <div className="md:hidden border-t border-outline-variant/40 bg-white/95">
         <div className="flex items-center gap-2 px-4 py-2.5 max-w-[1440px] mx-auto overflow-x-auto whitespace-nowrap">
           <Link
             className="text-on-surface-variant hover:text-primary transition-colors text-xs font-semibold uppercase tracking-widest"
-            to={APP_ROUTES.home}
+            to={NAVBAR_HOME_ROUTE}
           >
             Trang chủ
           </Link>
@@ -178,6 +292,7 @@ function SiteHeader() {
         </div>
       </div>
 
+      {/* Mobile slide-down menu */}
       <div
         className={`md:hidden border-t border-outline-variant/40 bg-white/95 ${isMobileMenuOpen ? "" : "hidden"}`}
       >
@@ -194,6 +309,33 @@ function SiteHeader() {
                 onNavigate={() => setMobileMenuOpen(false)}
               />
             ))}
+          </div>
+
+          {/* Mobile contact info */}
+          <div className="mt-4 pt-3 border-t border-outline-variant/30">
+            <p className="mb-2 text-[11px] uppercase tracking-[0.16em] font-bold text-on-surface-variant">
+              Liên hệ
+            </p>
+            <div className="space-y-2">
+              <a
+                href="tel:0123456789"
+                className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors"
+              >
+                <span className="material-symbols-outlined text-base">
+                  call
+                </span>
+                0123 456 789
+              </a>
+              <a
+                href="mailto:support@figure247.com"
+                className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors"
+              >
+                <span className="material-symbols-outlined text-base">
+                  mail
+                </span>
+                support@figure247.com
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -264,6 +406,19 @@ function SiteFooter() {
 }
 
 export default function SiteLayout() {
+  const { pathname } = useLocation();
+  const isAdminRoute =
+    pathname === APP_ROUTES.admin ||
+    pathname.startsWith(`${APP_ROUTES.admin}/`);
+
+  if (isAdminRoute) {
+    return (
+      <div className="min-h-screen bg-background text-on-background overflow-x-hidden">
+        <Outlet />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-on-background overflow-x-hidden">
       <SiteHeader />

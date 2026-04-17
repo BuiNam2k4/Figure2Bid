@@ -1,379 +1,538 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { listCategories, listProducts } from "../services/productService";
+import { APP_ROUTES } from "../utils/legacyRoutes";
+
+const PAGE_SIZE = 9;
+
+function formatPrice(value) {
+  const numericValue = Number(value || 0);
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+    maximumFractionDigits: 0,
+  }).format(numericValue);
+}
+
+function formatDate(isoString) {
+  if (!isoString) {
+    return "Khong ro";
+  }
+
+  const parsedDate = new Date(isoString);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return "Khong ro";
+  }
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(parsedDate);
+}
+
+function getStatusBadgeClass(status) {
+  const normalizedStatus = String(status || "").toUpperCase();
+
+  if (normalizedStatus === "AVAILABLE") {
+    return "bg-emerald-100 text-emerald-700";
+  }
+
+  if (normalizedStatus === "PENDING") {
+    return "bg-amber-100 text-amber-700";
+  }
+
+  if (normalizedStatus === "SOLD") {
+    return "bg-slate-200 text-slate-700";
+  }
+
+  return "bg-surface-container-high text-on-surface-variant";
+}
+
+function getProductImage(product) {
+  if (product?.mainImageUrl) {
+    return product.mainImageUrl;
+  }
+
+  if (Array.isArray(product?.imageUrls) && product.imageUrls.length > 0) {
+    return product.imageUrls[0];
+  }
+
+  return "/images/hero.webp";
+}
+
 export default function ExplorePage() {
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [categoryError, setCategoryError] = useState("");
+
+  const [keywordInput, setKeywordInput] = useState("");
+  const [keyword, setKeyword] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [status, setStatus] = useState("");
+  const [sort, setSort] = useState("createdAt,desc");
+
+  const [page, setPage] = useState(0);
+  const [productsPage, setProductsPage] = useState({
+    content: [],
+    number: 0,
+    totalPages: 0,
+    totalElements: 0,
+  });
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchCategories = async () => {
+      setIsLoadingCategories(true);
+      setCategoryError("");
+
+      try {
+        const data = await listCategories();
+        if (!isMounted) {
+          return;
+        }
+        setCategories(Array.isArray(data) ? data : []);
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+        setCategoryError(error.message || "Khong the tai danh muc.");
+      } finally {
+        if (isMounted) {
+          setIsLoadingCategories(false);
+        }
+      }
+    };
+
+    fetchCategories();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchProducts = async () => {
+      setIsLoadingProducts(true);
+      setProductsError("");
+
+      try {
+        const responsePage = await listProducts({
+          page,
+          size: PAGE_SIZE,
+          sort,
+          keyword: keyword || undefined,
+          categoryId: categoryId || undefined,
+          status: status || undefined,
+        });
+
+        if (!isMounted) {
+          return;
+        }
+
+        setProductsPage({
+          content: Array.isArray(responsePage?.content)
+            ? responsePage.content
+            : [],
+          number:
+            typeof responsePage?.number === "number" ? responsePage.number : 0,
+          totalPages:
+            typeof responsePage?.totalPages === "number"
+              ? responsePage.totalPages
+              : 0,
+          totalElements:
+            typeof responsePage?.totalElements === "number"
+              ? responsePage.totalElements
+              : 0,
+        });
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+        setProductsError(error.message || "Khong the tai danh sach san pham.");
+      } finally {
+        if (isMounted) {
+          setIsLoadingProducts(false);
+        }
+      }
+    };
+
+    fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [categoryId, keyword, page, sort, status]);
+
+  const productItems = productsPage.content;
+  const totalPages = productsPage.totalPages;
+  const currentPage = productsPage.number;
+
+  const pageNumbers = useMemo(() => {
+    if (!totalPages) {
+      return [];
+    }
+
+    const maxVisiblePages = 5;
+    const start = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
+    const end = Math.min(totalPages, start + maxVisiblePages);
+    const adjustedStart = Math.max(0, end - maxVisiblePages);
+
+    return Array.from(
+      { length: end - adjustedStart },
+      (_, index) => adjustedStart + index,
+    );
+  }, [currentPage, totalPages]);
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    setKeyword(keywordInput.trim());
+    setCategoryId("");
+    setStatus("");
+    setPage(0);
+  };
+
+  const handleCategoryChange = (event) => {
+    setCategoryId(event.target.value);
+    setKeyword("");
+    setKeywordInput("");
+    setStatus("");
+    setPage(0);
+  };
+
+  const handleStatusChange = (event) => {
+    setStatus(event.target.value);
+    setKeyword("");
+    setKeywordInput("");
+    setCategoryId("");
+    setPage(0);
+  };
+
+  const clearFilters = () => {
+    setKeyword("");
+    setKeywordInput("");
+    setCategoryId("");
+    setStatus("");
+    setSort("createdAt,desc");
+    setPage(0);
+  };
+
   return (
     <main className="pt-24 min-h-screen max-w-[1440px] mx-auto flex flex-col md:flex-row gap-8 px-8 pb-20">
-      {/* Sidebar Filters */}
       <aside className="w-full md:w-72 flex-shrink-0 space-y-8 md:sticky md:top-28 self-start">
-        <section>
-          <h3 className="font-headline text-lg font-bold mb-4 flex items-center gap-2">
-            <span
-              className="material-symbols-outlined text-primary"
-              data-icon="tune"
-            >
-              tune
-            </span>
+        <section className="rounded-xl bg-surface-container-low p-5 space-y-6">
+          <h3 className="font-headline text-lg font-bold flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary">tune</span>
             Lọc bộ sưu tập
           </h3>
-          {/* Series anime */}
-          <div className="space-y-4 mb-8">
-            <p className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
-              Series anime
-            </p>
-            <div className="space-y-2">
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  className="rounded border-outline-variant text-secondary focus:ring-secondary/20"
-                  type="checkbox"
-                />
-                <span className="text-sm group-hover:text-secondary transition-colors">
-                  One Piece
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  className="rounded border-outline-variant text-secondary focus:ring-secondary/20"
-                  type="checkbox"
-                />
-                <span className="text-sm group-hover:text-secondary transition-colors">
-                  Naruto
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  className="rounded border-outline-variant text-secondary focus:ring-secondary/20"
-                  type="checkbox"
-                />
-                <span className="text-sm group-hover:text-secondary transition-colors">
-                  Jujutsu Kaisen
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <input
-                  className="rounded border-outline-variant text-secondary focus:ring-secondary/20"
-                  type="checkbox"
-                />
-                <span className="text-sm group-hover:text-secondary transition-colors">
-                  Evangelion
-                </span>
-              </label>
-            </div>
-          </div>
-          {/* Tình trạng */}
-          <div className="space-y-4 mb-8">
-            <p className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
-              Tình trạng
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <button className="px-3 py-1.5 rounded-md text-xs font-medium bg-secondary text-white">
-                MISB
-              </button>
-              <button className="px-3 py-1.5 rounded-md text-xs font-medium bg-surface-container-high hover:bg-surface-container-highest transition-colors">
-                Mới
-              </button>
-              <button className="px-3 py-1.5 rounded-md text-xs font-medium bg-surface-container-high hover:bg-surface-container-highest transition-colors">
-                Đã qua sử dụng
-              </button>
-            </div>
-          </div>
-          {/* Price Range */}
-          <div className="space-y-4 mb-8">
-            <p className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
-              Khoảng giá (USD)
-            </p>
-            <div className="grid grid-cols-2 gap-2">
+
+          <form className="space-y-2" onSubmit={handleSearchSubmit}>
+            <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
+              Tìm theo tên
+            </label>
+            <div className="flex gap-2">
               <input
-                className="bg-surface-container-low border-none rounded-lg p-2 text-sm focus:ring-secondary/20"
-                placeholder="Tối thiểu"
-                type="number"
+                className="flex-1 rounded-lg bg-surface-container-lowest border border-outline-variant/40 px-3 py-2 text-sm"
+                onChange={(event) => setKeywordInput(event.target.value)}
+                placeholder="VD: Evangelion"
+                type="text"
+                value={keywordInput}
               />
-              <input
-                className="bg-surface-container-low border-none rounded-lg p-2 text-sm focus:ring-secondary/20"
-                placeholder="Tối đa"
-                type="number"
-              />
+              <button
+                className="rounded-lg bg-primary px-3 py-2 text-white text-sm font-semibold"
+                type="submit"
+              >
+                Tìm
+              </button>
             </div>
-          </div>
-          {/* End Date */}
-          <div className="space-y-4">
-            <p className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
-              Kết thúc đấu giá
-            </p>
-            <select className="w-full bg-surface-container-low border-none rounded-lg p-2 text-sm focus:ring-secondary/20 appearance-none">
-              <option>Mọi thời điểm</option>
-              <option>1 giờ tới</option>
-              <option>Hôm nay</option>
-              <option>Tuần này</option>
+          </form>
+
+          <div className="space-y-2">
+            <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
+              Danh mục
+            </label>
+            <select
+              className="w-full rounded-lg bg-surface-container-lowest border border-outline-variant/40 px-3 py-2 text-sm"
+              disabled={isLoadingCategories}
+              onChange={handleCategoryChange}
+              value={categoryId}
+            >
+              <option value="">
+                {isLoadingCategories
+                  ? "Dang tai danh muc..."
+                  : "Tat ca danh muc"}
+              </option>
+              {categories.map((category) => (
+                <option key={category.id} value={String(category.id)}>
+                  {category.name}
+                </option>
+              ))}
             </select>
           </div>
+
+          <div className="space-y-2">
+            <label className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
+              Trạng thái
+            </label>
+            <select
+              className="w-full rounded-lg bg-surface-container-lowest border border-outline-variant/40 px-3 py-2 text-sm"
+              onChange={handleStatusChange}
+              value={status}
+            >
+              <option value="">Tat ca trang thai</option>
+              <option value="AVAILABLE">AVAILABLE</option>
+              <option value="PENDING">PENDING</option>
+              <option value="SOLD">SOLD</option>
+            </select>
+          </div>
+
+          <button
+            className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest py-2 text-sm font-semibold hover:bg-surface-container"
+            onClick={clearFilters}
+            type="button"
+          >
+            Xóa bộ lọc
+          </button>
+
+          {categoryError && (
+            <p className="text-xs text-error leading-relaxed">
+              {categoryError}
+            </p>
+          )}
         </section>
+
         <div className="bg-surface-container-highest/30 p-6 rounded-xl border border-secondary/10">
           <p className="text-xs text-secondary font-bold mb-2 uppercase tracking-tighter">
-            Mẹo nhanh
+            Tạo nhanh
           </p>
-          <p className="text-xs text-on-surface-variant leading-relaxed">
-            Các phiên đấu sáng sớm (JST) thường ít cạnh tranh hơn. Hãy bật cảnh
-            báo cho "đợt hàng hiếm".
+          <p className="text-xs text-on-surface-variant leading-relaxed mb-3">
+            Muốn đăng vật phẩm của bạn? Chuyển sang trang đăng bán để tạo sản
+            phẩm mới ngay.
           </p>
+          <Link
+            className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline"
+            to={APP_ROUTES.sell}
+          >
+            Đăng sản phẩm
+            <span className="material-symbols-outlined text-base">
+              arrow_forward
+            </span>
+          </Link>
         </div>
       </aside>
-      {/* Main Content Area */}
+
       <div className="flex-1 min-w-0">
-        {/* Header & Sort */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
           <div>
             <h1 className="font-headline text-5xl font-extrabold tracking-tighter uppercase mb-2">
               Figure <span className="text-primary">.</span>
             </h1>
             <p className="text-on-surface-variant">
-              Tuyển chọn kiệt tác 2D từ khắp cộng đồng sưu tầm số.
+              Sản phẩm hiện có từ Product API: {productsPage.totalElements} mục
+              đang hiển thị.
             </p>
           </div>
+
           <div className="flex items-center gap-4">
             <span className="font-label text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">
               Sắp xếp theo
             </span>
             <div className="flex bg-surface-container-low p-1 rounded-lg overflow-x-auto">
-              <button className="px-4 py-2 text-xs font-bold rounded-md transition-all bg-surface-container-lowest shadow-sm">
-                Nhiều lượt đấu
-              </button>
-              <button className="px-4 py-2 text-xs font-bold rounded-md transition-all text-on-surface-variant hover:text-on-surface">
-                Sắp kết thúc
-              </button>
-              <button className="px-4 py-2 text-xs font-bold rounded-md transition-all text-on-surface-variant hover:text-on-surface">
+              <button
+                className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${
+                  sort === "createdAt,desc"
+                    ? "bg-surface-container-lowest shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+                onClick={() => {
+                  setSort("createdAt,desc");
+                  setPage(0);
+                }}
+                type="button"
+              >
                 Mới nhất
               </button>
+              <button
+                className={`px-4 py-2 text-xs font-bold rounded-md transition-all ${
+                  sort === "createdAt,asc"
+                    ? "bg-surface-container-lowest shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
+                }`}
+                onClick={() => {
+                  setSort("createdAt,asc");
+                  setPage(0);
+                }}
+                type="button"
+              >
+                Cũ hơn
+              </button>
             </div>
           </div>
         </div>
-        {/* Auction Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {/* Card 1 */}
-          <a className="block" href="/auction-detail">
-            <div className="group relative bg-surface-container-lowest rounded-xl overflow-visible p-6 transition-all duration-300 hover:translate-y-[-4px]">
-              <div className="relative mb-4">
-                <img
-                  alt="Portgas D. Ace figure"
-                  className="w-full h-80 object-cover rounded-lg group-hover:scale-105 transition-transform duration-500 shadow-xl"
-                  data-alt="Premium anime figure of a cybernetic warrior in a dynamic pose, high detail, studio lighting, deep blue background"
-                  src="/images/img4.jpg"
-                />
-                {/* Floating Glass Timer */}
-                <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                  <span
-                    className="material-symbols-outlined text-primary text-sm"
-                    style={{ fontVariationSettings: '"FILL" 1' }}
-                  >
-                    timer
-                  </span>
-                  <span className="font-headline text-primary font-bold text-sm">
-                    02:14:45
-                  </span>
-                </div>
+
+        {productsError && (
+          <div className="mb-6 rounded-lg border border-error/40 bg-error-container/20 px-4 py-3 text-sm text-error">
+            {productsError}
+          </div>
+        )}
+
+        {isLoadingProducts ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+              <div
+                key={`skeleton-${index}`}
+                className="rounded-xl bg-surface-container-lowest p-6 animate-pulse"
+              >
+                <div className="h-72 rounded-lg bg-surface-container mb-4" />
+                <div className="h-3 w-1/2 rounded bg-surface-container mb-3" />
+                <div className="h-6 w-4/5 rounded bg-surface-container mb-4" />
+                <div className="h-8 w-2/3 rounded bg-surface-container" />
               </div>
-              <div className="pt-2">
-                <div className="flex justify-between items-start mb-2">
-                  <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
-                    One Piece / 1:7 Scale
-                  </p>
-                  <span className="text-[10px] bg-surface-container-high px-2 py-0.5 rounded text-on-surface font-bold">
-                    24 lượt đấu
-                  </span>
-                </div>
-                <h2 className="font-headline text-xl font-bold leading-tight mb-4 group-hover:text-primary transition-colors">
-                  Portgas D. Ace - Commander 2
-                </h2>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] text-on-surface-variant font-bold uppercase">
-                      Giá hiện tại
-                    </p>
-                    <p className="text-2xl font-headline font-extrabold text-on-surface">
-                      $420.00
-                    </p>
+            ))}
+          </div>
+        ) : productItems.length === 0 ? (
+          <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-10 text-center">
+            <h2 className="font-headline text-2xl font-bold mb-2">
+              Chưa có sản phẩm phù hợp
+            </h2>
+            <p className="text-on-surface-variant mb-5">
+              Hãy đổi bộ lọc hoặc đăng sản phẩm đầu tiên của bạn.
+            </p>
+            <Link
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold text-white"
+              to={APP_ROUTES.sell}
+            >
+              Đăng sản phẩm ngay
+              <span className="material-symbols-outlined text-base">
+                arrow_forward
+              </span>
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              {productItems.map((product) => (
+                <article
+                  key={product.id}
+                  className="group relative bg-surface-container-lowest rounded-xl overflow-visible p-6 transition-all duration-300 hover:translate-y-[-4px]"
+                >
+                  <div className="relative mb-4">
+                    <img
+                      alt={product.name}
+                      className="w-full h-80 object-cover rounded-lg group-hover:scale-105 transition-transform duration-500 shadow-xl"
+                      src={getProductImage(product)}
+                    />
+                    <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary text-sm">
+                        calendar_month
+                      </span>
+                      <span className="font-headline text-primary font-bold text-xs">
+                        {formatDate(product.createdAt)}
+                      </span>
+                    </div>
                   </div>
-                  <button className="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md">
-                    ĐẶT GIÁ
+
+                  <div className="pt-2">
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
+                        {(product.categoryName || "UNCATEGORIZED").slice(0, 26)}
+                      </p>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded font-bold ${getStatusBadgeClass(
+                          product.status,
+                        )}`}
+                      >
+                        {String(product.status || "UNKNOWN").toUpperCase()}
+                      </span>
+                    </div>
+
+                    <h2 className="font-headline text-xl font-bold leading-tight mb-3 group-hover:text-primary transition-colors min-h-[56px]">
+                      {product.name}
+                    </h2>
+
+                    <p className="text-sm text-on-surface-variant mb-4 min-h-[42px]">
+                      {String(product.description || "").slice(0, 80)}
+                      {String(product.description || "").length > 80
+                        ? "..."
+                        : ""}
+                    </p>
+
+                    <div className="flex items-end justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] text-on-surface-variant font-bold uppercase">
+                          Giá khởi điểm
+                        </p>
+                        <p className="text-2xl font-headline font-extrabold text-on-surface">
+                          {formatPrice(product.basePrice)}
+                        </p>
+                        <p className="text-xs text-on-surface-variant mt-1">
+                          Seller: {product.sellerUsername || "Unknown"}
+                        </p>
+                      </div>
+
+                      <Link
+                        className="bg-gradient-to-br from-primary to-primary-container text-white px-5 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md"
+                        to={`${APP_ROUTES.auctionDetail}?id=${encodeURIComponent(
+                          String(product.id),
+                        )}`}
+                      >
+                        Xem
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-20 flex justify-center items-center gap-2 flex-wrap">
+                <button
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-low hover:bg-surface-container-high transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentPage <= 0}
+                  onClick={() => setPage((prev) => Math.max(0, prev - 1))}
+                  type="button"
+                >
+                  <span className="material-symbols-outlined text-on-surface">
+                    chevron_left
+                  </span>
+                </button>
+
+                {pageNumbers.map((pageIndex) => (
+                  <button
+                    key={pageIndex}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center font-headline transition-colors ${
+                      pageIndex === currentPage
+                        ? "bg-primary text-white font-bold"
+                        : "hover:bg-surface-container-low"
+                    }`}
+                    onClick={() => setPage(pageIndex)}
+                    type="button"
+                  >
+                    {pageIndex + 1}
                   </button>
-                </div>
-              </div>
-            </div>
-          </a>
-          {/* Card 2 */}
-          <div className="group relative bg-surface-container-lowest rounded-xl overflow-visible p-6 transition-all duration-300 hover:translate-y-[-4px]">
-            <div className="relative mb-4">
-              <img
-                alt="Sinanju Narrative Ver. Ka"
-                className="w-full h-80 object-cover rounded-lg group-hover:scale-105 transition-transform duration-500 shadow-xl"
-                data-alt="Highly detailed mecha robot figure with metallic red and gold finish, intricate mechanical parts, dramatic cinematic lighting"
-                src="/images/img1.webp"
-              />
-              <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-primary text-sm"
-                  style={{ fontVariationSettings: '"FILL" 1' }}
+                ))}
+
+                <button
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-low hover:bg-surface-container-high transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={currentPage >= totalPages - 1}
+                  onClick={() =>
+                    setPage((prev) => Math.min(totalPages - 1, prev + 1))
+                  }
+                  type="button"
                 >
-                  timer
-                </span>
-                <span className="font-headline text-primary font-bold text-sm">
-                  18:05:12
-                </span>
-              </div>
-            </div>
-            <div className="pt-2">
-              <div className="flex justify-between items-start mb-2">
-                <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
-                  Gundam / Master Grade
-                </p>
-                <span className="text-[10px] bg-surface-container-high px-2 py-0.5 rounded text-on-surface font-bold">
-                  8 lượt đấu
-                </span>
-              </div>
-              <h2 className="font-headline text-xl font-bold leading-tight mb-4 group-hover:text-primary transition-colors">
-                Sinanju Narrative Ver. Ka
-              </h2>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-on-surface-variant font-bold uppercase">
-                    Giá hiện tại
-                  </p>
-                  <p className="text-2xl font-headline font-extrabold text-on-surface">
-                    $185.00
-                  </p>
-                </div>
-                <button className="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md">
-                  ĐẶT GIÁ
+                  <span className="material-symbols-outlined text-on-surface">
+                    chevron_right
+                  </span>
                 </button>
               </div>
-            </div>
-          </div>
-          {/* Card 3 */}
-          <div className="group relative bg-surface-container-lowest rounded-xl overflow-visible p-6 transition-all duration-300 hover:translate-y-[-4px]">
-            <div className="relative mb-4">
-              <img
-                alt="Hatsune Miku Deep Sea Girl"
-                className="w-full h-80 object-cover rounded-lg group-hover:scale-105 transition-transform duration-500 shadow-xl"
-                data-alt="Limited edition anime character statue with flowing blue hair, detailed fabric textures on outfit, ethereal lighting in a white studio"
-                src="/images/img2.jpeg"
-              />
-              <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-primary text-sm"
-                  style={{ fontVariationSettings: '"FILL" 1' }}
-                >
-                  timer
-                </span>
-                <span className="font-headline text-primary font-bold text-sm">
-                  00:42:01
-                </span>
-              </div>
-            </div>
-            <div className="pt-2">
-              <div className="flex justify-between items-start mb-2">
-                <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
-                  Vocaloid / 1:8 Scale
-                </p>
-                <span className="text-[10px] bg-error-container px-2 py-0.5 rounded text-error font-bold">
-                  Sắp kết thúc
-                </span>
-              </div>
-              <h2 className="font-headline text-xl font-bold leading-tight mb-4 group-hover:text-primary transition-colors">
-                Hatsune Miku - Deep Sea Girl
-              </h2>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-on-surface-variant font-bold uppercase">
-                    Giá hiện tại
-                  </p>
-                  <p className="text-2xl font-headline font-extrabold text-on-surface">
-                    $310.00
-                  </p>
-                </div>
-                <button className="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md">
-                  ĐẶT GIÁ
-                </button>
-              </div>
-            </div>
-          </div>
-          {/* Card 4 */}
-          <div className="group relative bg-surface-container-lowest rounded-xl overflow-visible p-6 transition-all duration-300 hover:translate-y-[-4px]">
-            <div className="relative mb-4">
-              <img
-                alt="Sasuke Uchiha figure"
-                className="w-full h-80 object-cover rounded-lg group-hover:scale-105 transition-transform duration-500 shadow-xl"
-                data-alt="Glow-in-the-dark stylized figure of a comic book hero, neon accents, dark background with subtle sparks of light"
-                src="/images/img1.jpg"
-              />
-              <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center gap-2">
-                <span
-                  className="material-symbols-outlined text-primary text-sm"
-                  style={{ fontVariationSettings: '"FILL" 1' }}
-                >
-                  timer
-                </span>
-                <span className="font-headline text-primary font-bold text-sm">
-                  04:55:00
-                </span>
-              </div>
-            </div>
-            <div className="pt-2">
-              <div className="flex justify-between items-start mb-2">
-                <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
-                  Naruto / Vibration Stars
-                </p>
-                <span className="text-[10px] bg-surface-container-high px-2 py-0.5 rounded text-on-surface font-bold">
-                  15 lượt đấu
-                </span>
-              </div>
-              <h2 className="font-headline text-xl font-bold leading-tight mb-4 group-hover:text-primary transition-colors">
-                Sasuke Uchiha - Curse Mark
-              </h2>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] text-on-surface-variant font-bold uppercase">
-                    Giá hiện tại
-                  </p>
-                  <p className="text-2xl font-headline font-extrabold text-on-surface">
-                    $95.00
-                  </p>
-                </div>
-                <button className="bg-gradient-to-br from-primary to-primary-container text-white px-6 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md">
-                  ĐẶT GIÁ
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Pagination */}
-        <div className="mt-20 flex justify-center items-center gap-2">
-          <button className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-low hover:bg-surface-container-high transition-colors">
-            <span
-              className="material-symbols-outlined text-on-surface"
-              data-icon="chevron_left"
-            >
-              chevron_left
-            </span>
-          </button>
-          <button className="w-10 h-10 rounded-full flex items-center justify-center bg-primary text-white font-bold font-headline">
-            1
-          </button>
-          <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-low font-headline transition-colors">
-            2
-          </button>
-          <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-low font-headline transition-colors">
-            3
-          </button>
-          <span className="mx-2">...</span>
-          <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-low font-headline transition-colors">
-            12
-          </button>
-          <button className="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container-low hover:bg-surface-container-high transition-colors">
-            <span
-              className="material-symbols-outlined text-on-surface"
-              data-icon="chevron_right"
-            >
-              chevron_right
-            </span>
-          </button>
-        </div>
+            )}
+          </>
+        )}
       </div>
     </main>
   );

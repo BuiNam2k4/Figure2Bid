@@ -39,3 +39,357 @@ a {
 .tonal-shift-bottom {
   box-shadow: 0 10px 30px -10px rgba(184, 17, 32, 0.05);
 }
+
+/* ════════════════════════════════════════════════════════════
+   SITE HEADER — Fixed wrapper
+   ════════════════════════════════════════════════════════════ */
+.site-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 50;
+  background: rgba(249, 249, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 2px 24px rgba(17, 28, 44, 0.06);
+}
+
+/* ── Row 1: Top Header (Logo · Search · Auth) ────────────── */
+.site-header__top {
+  border-bottom: 1px solid rgba(17, 28, 44, 0.06);
+}
+
+.site-header__top-inner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0.6rem 1rem;
+}
+
+@media (min-width: 768px) {
+  .site-header__top-inner {
+    padding: 0.6rem 2rem;
+  }
+}
+
+/* Logo */
+.site-header__logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.site-header__logo-img {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+@media (min-width: 768px) {
+  .site-header__logo-img {
+    height: 52px;
+  }
+}
+
+/* Search */
+.site-header__search {
+  position: relative;
+  flex: 1 1 0%;
+  max-width: 520px;
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .site-header__search {
+    display: flex;
+  }
+}
+
+.site-header__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.site-header__search-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 1rem 0 2.75rem;
+  background: #f1f5f9;
+  border: 1.5px solid transparent;
+  border-radius: 999px;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.875rem;
+  color: #111c2c;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.site-header__search-input::placeholder {
+  color: #94a3b8;
+}
+
+.site-header__search-input:focus {
+  border-color: #b81120;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(184, 17, 32, 0.08);
+}
+
+/* Auth actions */
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+@media (min-width: 640px) {
+  .site-header__actions {
+    gap: 0.625rem;
+  }
+}
+
+.site-header__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(17, 28, 44, 0.1);
+  background: #fff;
+  color: #111c2c;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+}
+
+.site-header__icon-btn:hover {
+  background: #f1f5f9;
+  color: #b81120;
+}
+
+.site-header__icon-btn:active {
+  transform: scale(0.94);
+}
+
+.site-header__icon-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+.site-header__sell-btn {
+  display: none;
+  align-items: center;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.625rem;
+  border: 1px solid rgba(184, 17, 32, 0.25);
+  background: rgba(184, 17, 32, 0.05);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #b81120;
+  transition: background 0.2s, color 0.2s;
+}
+
+@media (min-width: 640px) {
+  .site-header__sell-btn {
+    display: inline-flex;
+  }
+}
+
+.site-header__sell-btn:hover {
+  background: #b81120;
+  color: #fff;
+}
+
+.site-header__login-btn,
+.site-header__register-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.site-header__btn-icon {
+  font-size: 18px !important;
+}
+
+.site-header__login-btn {
+  border: 1px solid rgba(17, 28, 44, 0.1);
+  background: #fff;
+  color: #111c2c;
+}
+
+.site-header__login-btn:hover {
+  background: #f1f5f9;
+  color: #b81120;
+}
+
+.site-header__register-btn {
+  border: none;
+  background: linear-gradient(135deg, #b81120 0%, #d4232f 100%);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(184, 17, 32, 0.2);
+}
+
+.site-header__register-btn:hover {
+  box-shadow: 0 6px 20px rgba(184, 17, 32, 0.3);
+  filter: brightness(1.08);
+}
+
+/* ── Row 2: Navbar (Nav links · Contact) ─────────────────── */
+.site-header__nav {
+  border-bottom: 1px solid rgba(17, 28, 44, 0.06);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.site-header__nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  min-height: 44px;
+}
+
+@media (min-width: 768px) {
+  .site-header__nav-inner {
+    padding: 0 2rem;
+  }
+}
+
+/* Hamburger (mobile only) */
+.site-header__hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(17, 28, 44, 0.08);
+  background: #fff;
+  color: #111c2c;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.site-header__hamburger:hover {
+  background: #f1f5f9;
+}
+
+@media (min-width: 768px) {
+  .site-header__hamburger {
+    display: none;
+  }
+}
+
+.site-header__hamburger .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Desktop nav links */
+.site-nav__links {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .site-nav__links {
+    display: flex;
+  }
+}
+
+.site-nav__link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  font-family: "Be Vietnam Pro", sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #475569;
+  border-radius: 0.5rem;
+  transition: color 0.2s, background 0.2s;
+}
+
+.site-nav__link:hover {
+  color: #b81120;
+  background: rgba(184, 17, 32, 0.04);
+}
+
+.site-nav__link--active {
+  color: #b81120;
+  font-weight: 700;
+  background: rgba(184, 17, 32, 0.06);
+}
+
+.site-nav__link--active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background: #b81120;
+  border-radius: 2px;
+}
+
+/* Contact info (desktop, right side of navbar) */
+.site-nav__contact {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .site-nav__contact {
+    display: flex;
+  }
+}
+
+.site-nav__contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+a.site-nav__contact-item:hover {
+  color: #b81120;
+}
+
+.site-nav__contact-item--static {
+  cursor: default;
+}
+
+.site-nav__contact-icon {
+  font-size: 16px !important;
+  color: #94a3b8;
+}
+
+a.site-nav__contact-item:hover .site-nav__contact-icon {
+  color: #b81120;
+}
+
+.site-nav__contact-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(17, 28, 44, 0.1);
+  flex-shrink: 0;
+}

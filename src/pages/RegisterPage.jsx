@@ -1,4 +1,69 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { register } from "../services/authService";
+import { saveAuthSession } from "../utils/authStorage";
+
 export default function RegisterPage() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    acceptTerms: false,
+  });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value, type, checked } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const fullName = formData.fullName.trim();
+    const email = formData.email.trim();
+    const { password, confirmPassword, acceptTerms } = formData;
+
+    if (!fullName || !email || !password || !confirmPassword) {
+      setErrorMessage("Vui long nhap day du thong tin dang ky.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMessage("Mat khau phai co it nhat 8 ky tu.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setErrorMessage("Xac nhan mat khau khong khop.");
+      return;
+    }
+
+    if (!acceptTerms) {
+      setErrorMessage("Ban can dong y dieu khoan truoc khi tiep tuc.");
+      return;
+    }
+
+    setErrorMessage("");
+    setIsSubmitting(true);
+
+    try {
+      const authData = await register({ fullName, email, password });
+      saveAuthSession(authData);
+      navigate("/home", { replace: true });
+    } catch (error) {
+      setErrorMessage(error.message || "Dang ky that bai. Vui long thu lai.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <main className="min-h-screen pt-24 flex flex-col md:flex-row">
       {/* Left: Form Canvas */}
@@ -17,12 +82,12 @@ export default function RegisterPage() {
               Gia nhập cộng đồng sưu tầm vật phẩm 2D tinh tuyển.
             </p>
           </div>
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* Full Name */}
             <div className="group">
               <label className="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1" htmlFor="name">Biệt danh sưu tầm / Họ và tên</label>
               <div className="relative">
-                <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="name" placeholder="VD: Sora Nanashi" type="text" />
+                <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="name" name="fullName" onChange={handleChange} placeholder="VD: Sora Nanashi" type="text" value={formData.fullName} />
                 <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-40">person</span>
               </div>
             </div>
@@ -30,7 +95,7 @@ export default function RegisterPage() {
             <div className="group">
               <label className="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1" htmlFor="email">Email liên hệ</label>
               <div className="relative">
-                <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="email" placeholder="curator@kinetic.jp" type="email" />
+                <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="email" name="email" onChange={handleChange} placeholder="curator@kinetic.jp" type="email" value={formData.email} />
                 <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-40">alternate_email</span>
               </div>
             </div>
@@ -39,14 +104,14 @@ export default function RegisterPage() {
               <div className="group">
                 <label className="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1" htmlFor="password">Mật khẩu</label>
                 <div className="relative">
-                  <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="password" placeholder="••••••••" type="password" />
+                  <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="password" name="password" onChange={handleChange} placeholder="••••••••" type="password" value={formData.password} />
                   <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-40">lock</span>
                 </div>
               </div>
               <div className="group">
                 <label className="block font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-2 ml-1" htmlFor="confirm_password">Xác nhận mật khẩu</label>
                 <div className="relative">
-                  <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="confirm_password" placeholder="••••••••" type="password" />
+                  <input className="w-full px-5 py-4 bg-surface-container-high border-none rounded-lg focus:ring-2 focus:ring-secondary focus:bg-surface-container-lowest transition-all duration-300 placeholder:text-slate-400" id="confirm_password" name="confirmPassword" onChange={handleChange} placeholder="••••••••" type="password" value={formData.confirmPassword} />
                   <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-40">verified_user</span>
                 </div>
               </div>
@@ -54,7 +119,7 @@ export default function RegisterPage() {
             {/* Terms */}
             <div className="flex items-start gap-3 py-2">
               <div className="relative flex items-center h-5">
-                <input className="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary focus:ring-offset-background" id="terms" type="checkbox" />
+                <input checked={formData.acceptTerms} className="w-5 h-5 rounded-md border-outline-variant text-primary focus:ring-primary focus:ring-offset-background" id="terms" name="acceptTerms" onChange={handleChange} type="checkbox" />
               </div>
               <label className="text-sm text-on-surface-variant font-body leading-tight" htmlFor="terms">
                 Tôi đồng ý với
@@ -62,16 +127,21 @@ export default function RegisterPage() {
                 và Điều khoản thành viên.
               </label>
             </div>
+            {errorMessage && (
+              <p className="text-sm text-primary font-body" role="alert">
+                {errorMessage}
+              </p>
+            )}
             {/* CTA */}
-            <button className="w-full py-5 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-bold text-lg rounded-xl shadow-[0_10px_30px_rgba(184,17,32,0.3)] hover:scale-[1.02] active:scale-95 transition-all duration-200 uppercase tracking-wider group flex items-center justify-center gap-2" type="submit">
-              Tạo tài khoản
+            <button className="w-full py-5 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-bold text-lg rounded-xl shadow-[0_10px_30px_rgba(184,17,32,0.3)] hover:scale-[1.02] active:scale-95 transition-all duration-200 uppercase tracking-wider group flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed" disabled={isSubmitting} type="submit">
+              {isSubmitting ? "Dang tao tai khoan..." : "Tao tai khoan"}
               <span className="material-symbols-outlined">bolt</span>
             </button>
           </form>
           <div className="mt-10 text-center">
             <p className="text-on-surface-variant font-body">
               Đã có tài khoản?
-              <a className="text-on-surface font-bold hover:text-primary transition-colors ml-1" href="#">Đăng nhập</a>
+              <Link className="text-on-surface font-bold hover:text-primary transition-colors ml-1" to="/login">Dang nhap</Link>
             </p>
           </div>
         </div>

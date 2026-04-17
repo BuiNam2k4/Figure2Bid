@@ -1,31 +1,48 @@
-import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "../services/authService";
+import { saveAuthSession } from "../utils/authStorage";
+import { APP_ROUTES } from "../utils/legacyRoutes";
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const mainRef = useRef(null);
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  useEffect(() => {
-    const loginForm = mainRef.current?.querySelector("#loginForm");
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    if (!loginForm) {
-      return undefined;
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const email = formData.email.trim();
+    const password = formData.password;
+
+    if (!email || !password) {
+      setErrorMessage("Vui long nhap day du email va mat khau.");
+      return;
     }
 
-    const handleSubmit = (event) => {
-      event.preventDefault();
-      navigate("/home");
-    };
+    setErrorMessage("");
+    setIsSubmitting(true);
 
-    loginForm.addEventListener("submit", handleSubmit);
-
-    return () => {
-      loginForm.removeEventListener("submit", handleSubmit);
-    };
-  }, [navigate]);
+    try {
+      const authData = await login({ email, password });
+      saveAuthSession(authData);
+      navigate("/home", { replace: true });
+    } catch (error) {
+      setErrorMessage(error.message || "Dang nhap that bai. Vui long thu lai.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <main ref={mainRef} className="min-h-screen pt-24 flex items-stretch">
+    <main className="min-h-screen pt-24 flex items-stretch">
       {/* Left: High-Impact Visual Column */}
       <section className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-on-background">
         <div className="absolute inset-0 z-0">
@@ -83,12 +100,12 @@ export default function LoginPage() {
             </p>
           </div>
           {/* Form Section */}
-          <form className="space-y-6" id="loginForm">
+          <form className="space-y-6" id="loginForm" onSubmit={handleSubmit}>
             <div>
               <label className="block font-label text-[10px] tracking-widest uppercase text-on-surface-variant font-bold mb-2" htmlFor="identifier">
-                Tên đăng nhập hoặc email
+                Email dang nhap
               </label>
-              <input className="w-full h-14 px-6 bg-surface-container-low border-none focus:ring-2 focus:ring-secondary/20 focus:bg-white rounded-lg transition-all font-body text-on-surface placeholder:text-outline-variant/60" id="identifier" name="identifier" placeholder="collector_01" type="text" />
+              <input className="w-full h-14 px-6 bg-surface-container-low border-none focus:ring-2 focus:ring-secondary/20 focus:bg-white rounded-lg transition-all font-body text-on-surface placeholder:text-outline-variant/60" id="identifier" name="email" onChange={handleChange} placeholder="collector@mail.com" type="email" value={formData.email} />
             </div>
             <div>
               <div className="flex justify-between items-center mb-2">
@@ -100,15 +117,20 @@ export default function LoginPage() {
                 </a>
               </div>
               <div className="relative">
-                <input className="w-full h-14 px-6 bg-surface-container-low border-none focus:ring-2 focus:ring-secondary/20 focus:bg-white rounded-lg transition-all font-body text-on-surface" id="password" name="password" placeholder="••••••••" type="password" />
-                <button className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant" type="button">
+                <input className="w-full h-14 px-6 bg-surface-container-low border-none focus:ring-2 focus:ring-secondary/20 focus:bg-white rounded-lg transition-all font-body text-on-surface" id="password" name="password" onChange={handleChange} placeholder="••••••••" type={showPassword ? "text" : "password"} value={formData.password} />
+                <button className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant" onClick={() => setShowPassword((prev) => !prev)} type="button">
                   <span className="material-symbols-outlined text-xl">visibility</span>
                 </button>
               </div>
             </div>
+            {errorMessage && (
+              <p className="text-sm text-primary font-body" role="alert">
+                {errorMessage}
+              </p>
+            )}
             {/* Primary Action */}
-            <button className="w-full h-16 bg-gradient-to-br from-primary to-primary-container text-white font-headline font-bold text-lg rounded-lg shadow-[0_10px_20px_rgba(184,17,32,0.2)] hover:shadow-[0_15px_30px_rgba(184,17,32,0.3)] transition-all active:scale-[0.98] uppercase tracking-wider" type="submit">
-              Vào kho sưu tầm
+            <button className="w-full h-16 bg-gradient-to-br from-primary to-primary-container text-white font-headline font-bold text-lg rounded-lg shadow-[0_10px_20px_rgba(184,17,32,0.2)] hover:shadow-[0_15px_30px_rgba(184,17,32,0.3)] transition-all active:scale-[0.98] uppercase tracking-wider disabled:opacity-70 disabled:cursor-not-allowed" disabled={isSubmitting} type="submit">
+              {isSubmitting ? "Dang dang nhap..." : "Vao kho suu tam"}
             </button>
           </form>
           {/* Social Login Divider */}
@@ -141,9 +163,18 @@ export default function LoginPage() {
           <div className="mt-16 text-center">
             <p className="font-label text-xs uppercase tracking-widest text-on-surface-variant">
               Mới tham gia sưu tầm?
-              <a className="font-black text-secondary hover:text-primary transition-colors ml-1" href="#">
+              <Link className="font-black text-secondary hover:text-primary transition-colors ml-1" to="/register">
                 Tạo tài khoản
-              </a>
+              </Link>
+            </p>
+            <p className="mt-3 font-label text-[11px] tracking-widest uppercase text-outline-variant">
+              Quản trị viên?
+              <Link
+                className="font-black text-primary hover:text-secondary transition-colors ml-1"
+                to={APP_ROUTES.adminLogin}
+              >
+                Đăng nhập Admin
+              </Link>
             </p>
           </div>
         </div>
