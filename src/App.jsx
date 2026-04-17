@@ -39,15 +39,6 @@ export default function App() {
           />
           <Route path="register" element={<RegisterPage />} />
 
-          <Route
-            path="sell-auction-page.html"
-            element={<Navigate replace to={APP_ROUTES.sell} />}
-          />
-          <Route
-            path="pages/sell-auction-page.html"
-            element={<Navigate replace to={APP_ROUTES.sell} />}
-          />
-
           <Route element={<RequireAuth />}>
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="cart" element={<CartPage />} />
@@ -60,7 +51,94 @@ export default function App() {
             </Route>
           </Route>
 
-          <Route path="*" element={<NotFoundPage />} />
+          {/* <Route path="index.html" element={<Navigate replace to="/" />} />
+          <Route
+            path="home-page.html"
+            element={<Navigate replace to="/home" />}
+          />
+          <Route
+            path="landing-page.html"
+            element={<Navigate replace to="/landing" />}
+          />
+          <Route
+            path="explore-page.html"
+            element={<Navigate replace to="/explore" />}
+          />
+          <Route
+            path="news-page.html"
+            element={<Navigate replace to="/news" />}
+          />
+          <Route
+            path="dashboard-page.html"
+            element={<Navigate replace to="/dashboard" />}
+          />
+          <Route
+            path="auction-detail-page.html"
+            element={<Navigate replace to="/auction-detail" />}
+          />
+          <Route
+            path="cart-page.html"
+            element={<Navigate replace to="/cart" />}
+          />
+          <Route
+            path="sell-auction-page.html"
+            element={<Navigate replace to="/sell" />}
+          />
+          <Route
+            path="login-page.html"
+            element={<Navigate replace to="/login" />}
+          />
+          <Route
+            path="register-page.html"
+            element={<Navigate replace to="/register" />}
+          />
+
+          <Route
+            path="pages/index.html"
+            element={<Navigate replace to="/" />}
+          />
+          <Route
+            path="pages/home-page.html"
+            element={<Navigate replace to="/home" />}
+          />
+          <Route
+            path="pages/landing-page.html"
+            element={<Navigate replace to="/landing" />}
+          />
+          <Route
+            path="pages/explore-page.html"
+            element={<Navigate replace to="/explore" />}
+          />
+          <Route
+            path="pages/news-page.html"
+            element={<Navigate replace to="/news" />}
+          />
+          <Route
+            path="pages/dashboard-page.html"
+            element={<Navigate replace to="/dashboard" />}
+          />
+          <Route
+            path="pages/auction-detail-page.html"
+            element={<Navigate replace to="/auction-detail" />}
+          />
+          <Route
+            path="pages/cart-page.html"
+            element={<Navigate replace to="/cart" />}
+          />
+          <Route
+            path="pages/sell-auction-page.html"
+            element={<Navigate replace to="/sell" />}
+          />
+          <Route
+            path="pages/login-page.html"
+            element={<Navigate replace to="/login" />}
+          />
+          <Route
+            path="pages/register-page.html"
+            element={<Navigate replace to="/register" />}
+          />
+
+          <Route path="*" element={<NotFoundPage />} /> */}
         </Route>
       </Routes>
     </>

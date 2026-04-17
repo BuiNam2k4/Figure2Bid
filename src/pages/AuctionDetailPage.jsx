@@ -17,6 +17,27 @@ function formatPrice(value) {
   }).format(numericValue);
 }
 
+function parseBidAmountInput(rawValue) {
+  const digitsOnly = String(rawValue || "").replace(/\D/g, "");
+  if (!digitsOnly) {
+    return 0;
+  }
+
+  const parsedValue = Number(digitsOnly);
+  return Number.isFinite(parsedValue) ? parsedValue : 0;
+}
+
+function formatBidAmountInput(rawValue) {
+  const numericValue = parseBidAmountInput(rawValue);
+  if (numericValue <= 0) {
+    return "";
+  }
+
+  return new Intl.NumberFormat("vi-VN", {
+    maximumFractionDigits: 0,
+  }).format(Math.floor(numericValue));
+}
+
 function formatDate(isoString) {
   if (!isoString) {
     return "Khong ro";
@@ -325,7 +346,7 @@ export default function AuctionDetailPage() {
     }
 
     if (!bidAmount && minimumBid > 0) {
-      setBidAmount(String(Math.ceil(minimumBid)));
+      setBidAmount(formatBidAmountInput(String(Math.ceil(minimumBid))));
     }
   }, [auction, bidAmount, minimumBid]);
 
@@ -349,7 +370,7 @@ export default function AuctionDetailPage() {
       return;
     }
 
-    const numericBidAmount = Number(bidAmount);
+    const numericBidAmount = parseBidAmountInput(bidAmount);
     if (!Number.isFinite(numericBidAmount) || numericBidAmount <= 0) {
       setBidSubmitError("Gia dat khong hop le.");
       return;
@@ -665,16 +686,19 @@ export default function AuctionDetailPage() {
                         </label>
                         <input
                           className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-2.5"
+                          autoComplete="off"
                           id="bidAmount"
-                          min={minimumBid > 0 ? Math.ceil(minimumBid) : 1}
+                          inputMode="numeric"
                           onChange={(event) => {
-                            setBidAmount(event.target.value);
+                            setBidAmount(
+                              formatBidAmountInput(event.target.value),
+                            );
                             setBidSubmitError("");
                             setBidSubmitSuccess("");
                           }}
+                          pattern="[0-9.]*"
                           placeholder="Nhap gia ban muon dat"
-                          step="1"
-                          type="number"
+                          type="text"
                           value={bidAmount}
                         />
                       </div>

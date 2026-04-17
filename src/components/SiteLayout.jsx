@@ -7,7 +7,7 @@ const NAVBAR_HOME_ROUTE = "/home";
 
 const desktopNavItems = [
   { label: "Trang chủ", to: NAVBAR_HOME_ROUTE },
-  { label: "Khám phá", to: APP_ROUTES.explore },
+  { label: "Phiên đấu giá", to: APP_ROUTES.explore },
   { label: "Tin tức", to: APP_ROUTES.news },
   { label: "Bảng điều khiển", to: APP_ROUTES.dashboard },
 ];

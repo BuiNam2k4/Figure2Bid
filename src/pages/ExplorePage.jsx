@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { getAuctionByProductId } from "../services/auctionService";
 import { listCategories, listProducts } from "../services/productService";
 import { APP_ROUTES } from "../utils/legacyRoutes";
 
@@ -31,22 +32,110 @@ function formatDate(isoString) {
   }).format(parsedDate);
 }
 
+function formatCountdown(milliseconds) {
+  const clampedMilliseconds = Math.max(0, milliseconds);
+  const totalSeconds = Math.floor(clampedMilliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return [hours, minutes, seconds]
+    .map((part) => String(part).padStart(2, "0"))
+    .join(":");
+}
+
+function buildAuctionTimeInfo(auction, nowMs) {
+  if (!auction) {
+    return {
+      label: "Phien dau gia",
+      value: "Chua mo",
+    };
+  }
+
+  const status = String(auction.status || "").toUpperCase();
+  const startMs = new Date(auction.startTime).getTime();
+  const endMs = new Date(auction.endTime).getTime();
+
+  if (status === "CANCELLED") {
+    return {
+      label: "Phien dau gia",
+      value: "Da huy",
+    };
+  }
+
+  if (!Number.isFinite(endMs)) {
+    return {
+      label: "Thoi gian",
+      value: "--:--:--",
+    };
+  }
+
+  if (status === "ENDED" || nowMs >= endMs) {
+    return {
+      label: "Phien dau gia",
+      value: "Da ket thuc",
+    };
+  }
+
+  if (Number.isFinite(startMs) && nowMs < startMs && status !== "ACTIVE") {
+    return {
+      label: "Bat dau sau",
+      value: formatCountdown(startMs - nowMs),
+    };
+  }
+
+  return {
+    label: "Thoi gian con lai",
+    value: formatCountdown(endMs - nowMs),
+  };
+}
+
 function getStatusBadgeClass(status) {
   const normalizedStatus = String(status || "").toUpperCase();
 
-  if (normalizedStatus === "AVAILABLE") {
-    return "bg-emerald-100 text-emerald-700";
+  if (normalizedStatus === "ACTIVE") {
+    return "bg-primary/10 text-primary";
   }
 
-  if (normalizedStatus === "PENDING") {
+  if (normalizedStatus === "SCHEDULED") {
     return "bg-amber-100 text-amber-700";
   }
 
-  if (normalizedStatus === "SOLD") {
+  if (normalizedStatus === "ENDED") {
     return "bg-slate-200 text-slate-700";
   }
 
+  if (normalizedStatus === "CANCELLED") {
+    return "bg-rose-100 text-rose-700";
+  }
+
   return "bg-surface-container-high text-on-surface-variant";
+}
+
+function getProductStatusOverlayLabel(status) {
+  const normalizedStatus = String(status || "").toUpperCase();
+
+  if (normalizedStatus === "ACTIVE") {
+    return "TRUC TIEP";
+  }
+
+  if (normalizedStatus === "SCHEDULED") {
+    return "SAP DIEN RA";
+  }
+
+  if (normalizedStatus === "ENDED") {
+    return "DA KET THUC";
+  }
+
+  if (normalizedStatus === "CANCELLED") {
+    return "DA HUY";
+  }
+
+  if (normalizedStatus === "NO_AUCTION") {
+    return "CHUA MO";
+  }
+
+  return normalizedStatus || "UNKNOWN";
 }
 
 function getProductImage(product) {
@@ -81,6 +170,18 @@ export default function ExplorePage() {
   });
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState("");
+  const [auctionByProductId, setAuctionByProductId] = useState({});
+  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setCountdownNowMs(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -172,6 +273,53 @@ export default function ExplorePage() {
   const productItems = productsPage.content;
   const totalPages = productsPage.totalPages;
   const currentPage = productsPage.number;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAuctionsForProducts = async () => {
+      const productIds = Array.from(
+        new Set(
+          (Array.isArray(productsPage.content) ? productsPage.content : [])
+            .map((product) => product?.id)
+            .filter((id) => id !== undefined && id !== null),
+        ),
+      );
+
+      if (productIds.length === 0) {
+        setAuctionByProductId({});
+        return;
+      }
+
+      const results = await Promise.all(
+        productIds.map(async (productId) => {
+          try {
+            const auction = await getAuctionByProductId(productId);
+            return [productId, auction || null];
+          } catch {
+            return [productId, null];
+          }
+        }),
+      );
+
+      if (!isMounted) {
+        return;
+      }
+
+      const mapped = {};
+      results.forEach(([productId, auction]) => {
+        mapped[productId] = auction;
+      });
+
+      setAuctionByProductId(mapped);
+    };
+
+    loadAuctionsForProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [productsPage.content]);
 
   const pageNumbers = useMemo(() => {
     if (!totalPages) {
@@ -386,12 +534,15 @@ export default function ExplorePage() {
             {Array.from({ length: PAGE_SIZE }).map((_, index) => (
               <div
                 key={`skeleton-${index}`}
-                className="rounded-xl bg-surface-container-lowest p-6 animate-pulse"
+                className="rounded-2xl bg-surface-container-lowest overflow-hidden animate-pulse"
               >
-                <div className="h-72 rounded-lg bg-surface-container mb-4" />
-                <div className="h-3 w-1/2 rounded bg-surface-container mb-3" />
-                <div className="h-6 w-4/5 rounded bg-surface-container mb-4" />
-                <div className="h-8 w-2/3 rounded bg-surface-container" />
+                <div className="aspect-[4/5] bg-surface-container" />
+                <div className="p-6 space-y-3">
+                  <div className="h-4 w-1/2 rounded bg-surface-container" />
+                  <div className="h-6 w-4/5 rounded bg-surface-container" />
+                  <div className="h-10 rounded bg-surface-container" />
+                  <div className="h-7 w-2/3 rounded bg-surface-container" />
+                </div>
               </div>
             ))}
           </div>
@@ -416,77 +567,106 @@ export default function ExplorePage() {
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {productItems.map((product) => (
-                <article
-                  key={product.id}
-                  className="group relative bg-surface-container-lowest rounded-xl overflow-visible p-6 transition-all duration-300 hover:translate-y-[-4px]"
-                >
-                  <div className="relative mb-4">
-                    <img
-                      alt={product.name}
-                      className="w-full h-80 object-cover rounded-lg group-hover:scale-105 transition-transform duration-500 shadow-xl"
-                      src={getProductImage(product)}
-                    />
-                    <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary text-sm">
-                        calendar_month
-                      </span>
-                      <span className="font-headline text-primary font-bold text-xs">
-                        {formatDate(product.createdAt)}
-                      </span>
-                    </div>
-                  </div>
+              {productItems.map((product) => {
+                const auction = auctionByProductId[product.id] || null;
+                const auctionStatus = String(
+                  auction?.status || "NO_AUCTION",
+                ).toUpperCase();
+                const statusLabel = getProductStatusOverlayLabel(auctionStatus);
+                const timeInfo = buildAuctionTimeInfo(auction, countdownNowMs);
+                const currentPriceText =
+                  auction &&
+                  auction.currentPrice !== undefined &&
+                  auction.currentPrice !== null
+                    ? formatPrice(auction.currentPrice)
+                    : "CHUA CO";
 
-                  <div className="pt-2">
-                    <div className="flex justify-between items-start mb-2 gap-2">
-                      <p className="font-label text-[10px] uppercase tracking-widest text-secondary font-bold">
-                        {(product.categoryName || "UNCATEGORIZED").slice(0, 26)}
-                      </p>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded font-bold ${getStatusBadgeClass(
-                          product.status,
-                        )}`}
-                      >
-                        {String(product.status || "UNKNOWN").toUpperCase()}
-                      </span>
-                    </div>
+                return (
+                  <Link
+                    key={product.id}
+                    aria-label={`Xem chi tiet ${product.name || "san pham"}`}
+                    className="group relative bg-surface-container-lowest rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 block"
+                    to={`${APP_ROUTES.auctionDetail}?id=${encodeURIComponent(
+                      String(product.id),
+                    )}`}
+                  >
+                    <div className="relative aspect-[4/5] overflow-hidden">
+                      <img
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                        src={getProductImage(product)}
+                      />
 
-                    <h2 className="font-headline text-xl font-bold leading-tight mb-3 group-hover:text-primary transition-colors min-h-[56px]">
-                      {product.name}
-                    </h2>
-
-                    <p className="text-sm text-on-surface-variant mb-4 min-h-[42px]">
-                      {String(product.description || "").slice(0, 80)}
-                      {String(product.description || "").length > 80
-                        ? "..."
-                        : ""}
-                    </p>
-
-                    <div className="flex items-end justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] text-on-surface-variant font-bold uppercase">
-                          Giá khởi điểm
-                        </p>
-                        <p className="text-2xl font-headline font-extrabold text-on-surface">
-                          {formatPrice(product.basePrice)}
-                        </p>
-                        <p className="text-xs text-on-surface-variant mt-1">
-                          Seller: {product.sellerUsername || "Unknown"}
-                        </p>
+                      <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-red-400/40 shadow-lg shadow-red-600/20">
+                        <span className="font-headline font-extrabold text-xs text-red-500 tracking-wide animate-[pulse_0.85s_ease-in-out_infinite]">
+                          {statusLabel}
+                        </span>
                       </div>
 
-                      <Link
-                        className="bg-gradient-to-br from-primary to-primary-container text-white px-5 py-2.5 rounded-lg font-headline font-bold text-sm hover:opacity-90 active:scale-95 transition-all shadow-md"
-                        to={`${APP_ROUTES.auctionDetail}?id=${encodeURIComponent(
-                          String(product.id),
-                        )}`}
-                      >
-                        Xem
-                      </Link>
+                      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-red-400/40 shadow-lg shadow-red-600/20">
+                        <span className="font-headline font-extrabold text-xs text-red-500 tabular-nums animate-[pulse_0.85s_ease-in-out_infinite]">
+                          {currentPriceText}
+                        </span>
+                      </div>
+
+                      <div className="absolute bottom-4 left-4 right-4 z-30 bg-black/60 backdrop-blur-sm p-3 rounded-xl flex justify-between items-center border border-red-400/40 shadow-lg shadow-red-600/20">
+                        <span className="font-label text-[10px] uppercase font-bold text-red-400 tracking-wide">
+                          {timeInfo.label}
+                        </span>
+                        <span className="font-headline font-extrabold text-red-500 tabular-nums">
+                          {timeInfo.value}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))}
+
+                    <div className="p-6">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <p className="font-label text-xs text-slate-500 uppercase tracking-widest">
+                          {(product.categoryName || "UNCATEGORIZED").slice(0, 26)}
+                        </p>
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded font-bold ${getStatusBadgeClass(
+                            auctionStatus,
+                          )}`}
+                        >
+                          {statusLabel}
+                        </span>
+                      </div>
+
+                      <h2 className="font-headline font-bold text-lg mb-4 group-hover:text-primary transition-colors min-h-[56px]">
+                        {product.name}
+                      </h2>
+
+                      <p className="text-sm text-on-surface-variant mb-4 min-h-[42px]">
+                        {String(product.description || "").slice(0, 80)}
+                        {String(product.description || "").length > 80
+                          ? "..."
+                          : ""}
+                      </p>
+
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex flex-col">
+                          <span className="font-label text-[10px] text-on-surface-variant uppercase">
+                            Gia hien tai
+                          </span>
+                          <span className="font-headline font-bold text-xl text-on-background">
+                            {currentPriceText}
+                          </span>
+                          <span className="font-label text-[10px] text-on-surface-variant uppercase mt-1">
+                            {auctionStatus}
+                          </span>
+                        </div>
+
+                        <span className="bg-surface-container-high group-hover:bg-primary group-hover:text-on-primary p-3 rounded-xl transition-colors duration-300">
+                          <span className="material-symbols-outlined text-lg">
+                            gavel
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
 
             {totalPages > 1 && (
