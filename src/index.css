@@ -130,7 +130,10 @@ a {
   font-size: 0.875rem;
   color: #111c2c;
   outline: none;
-  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
 }
 
 .site-header__search-input::placeholder {
@@ -169,7 +172,10 @@ a {
   background: #fff;
   color: #111c2c;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.15s;
 }
 
 .site-header__icon-btn:hover {
@@ -195,7 +201,9 @@ a {
   font-size: 0.8125rem;
   font-weight: 600;
   color: #b81120;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 @media (min-width: 640px) {
@@ -219,7 +227,10 @@ a {
   font-size: 0.8125rem;
   font-weight: 600;
   white-space: nowrap;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    box-shadow 0.2s;
 }
 
 .site-header__btn-icon {
@@ -323,7 +334,9 @@ a {
   font-weight: 600;
   color: #475569;
   border-radius: 0.5rem;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
 
 .site-nav__link:hover {
