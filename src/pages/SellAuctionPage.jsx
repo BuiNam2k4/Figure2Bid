@@ -2,20 +2,44 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import ImageUpload from "../components/ImageUpload";
+import { createAuction } from "../services/auctionService";
 import { createProduct, listCategories } from "../services/productService";
 import { APP_ROUTES } from "../utils/legacyRoutes";
 
-const INITIAL_FORM = {
-  name: "",
-  categoryId: "",
-  condition: "",
-  status: "AVAILABLE",
-  basePrice: "",
-  scale: "",
-  height: "",
-  material: "",
-  description: "",
-};
+const DEFAULT_AUCTION_START_DELAY_MINUTES = 10;
+const DEFAULT_AUCTION_DURATION_HOURS = 24;
+
+function toDateTimeLocalValue(dateValue) {
+  const date = new Date(dateValue);
+  const timezoneOffsetMinutes = date.getTimezoneOffset();
+  const localDate = new Date(date.getTime() - timezoneOffsetMinutes * 60_000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function createInitialForm() {
+  const now = new Date();
+  const auctionStart = new Date(
+    now.getTime() + DEFAULT_AUCTION_START_DELAY_MINUTES * 60_000,
+  );
+  const auctionEnd = new Date(
+    auctionStart.getTime() + DEFAULT_AUCTION_DURATION_HOURS * 60 * 60_000,
+  );
+
+  return {
+    name: "",
+    categoryId: "",
+    condition: "",
+    status: "AVAILABLE",
+    basePrice: "",
+    stepPrice: "",
+    auctionStartTime: toDateTimeLocalValue(auctionStart),
+    auctionEndTime: toDateTimeLocalValue(auctionEnd),
+    scale: "",
+    height: "",
+    material: "",
+    description: "",
+  };
+}
 
 function normalizeUploadedImageUrl(uploadResult) {
   if (!uploadResult || typeof uploadResult !== "object") {
@@ -33,7 +57,7 @@ export default function SellAuctionPage() {
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [categoryError, setCategoryError] = useState("");
 
-  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [formData, setFormData] = useState(() => createInitialForm());
   const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
   const [imageUploadKey, setImageUploadKey] = useState(0);
 
@@ -84,6 +108,9 @@ export default function SellAuctionPage() {
       formData.condition &&
       formData.status &&
       formData.basePrice &&
+      formData.stepPrice &&
+      formData.auctionStartTime &&
+      formData.auctionEndTime &&
       formData.description.trim() &&
       uploadedImageUrls.length > 0 &&
       isAuthenticChecked &&
@@ -119,13 +146,42 @@ export default function SellAuctionPage() {
       return;
     }
 
+    const basePriceValue = Number(formData.basePrice);
+    const stepPriceValue = Number(formData.stepPrice);
+
+    if (!Number.isFinite(basePriceValue) || basePriceValue <= 0) {
+      setSubmitError("Gia khoi diem phai lon hon 0.");
+      return;
+    }
+
+    if (!Number.isFinite(stepPriceValue) || stepPriceValue <= 0) {
+      setSubmitError("Buoc gia (step) phai lon hon 0.");
+      return;
+    }
+
+    const auctionStartDate = new Date(formData.auctionStartTime);
+    const auctionEndDate = new Date(formData.auctionEndTime);
+
+    if (
+      Number.isNaN(auctionStartDate.getTime()) ||
+      Number.isNaN(auctionEndDate.getTime())
+    ) {
+      setSubmitError("Thoi gian mo/ket thuc phien dau gia khong hop le.");
+      return;
+    }
+
+    if (auctionEndDate <= auctionStartDate) {
+      setSubmitError("Thoi gian ket thuc phai lon hon thoi gian bat dau.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const payload = {
         name: formData.name,
         description: formData.description,
-        basePrice: formData.basePrice,
+        basePrice: basePriceValue,
         scale: formData.scale,
         height: formData.height,
         material: formData.material,
@@ -137,7 +193,23 @@ export default function SellAuctionPage() {
 
       const createdProduct = await createProduct(payload);
 
-      setFormData(INITIAL_FORM);
+      let createdAuction;
+
+      try {
+        createdAuction = await createAuction({
+          productId: createdProduct.id,
+          startPrice: basePriceValue,
+          stepPrice: stepPriceValue,
+          startTime: auctionStartDate,
+          endTime: auctionEndDate,
+        });
+      } catch (auctionError) {
+        throw new Error(
+          `San pham #${createdProduct.id} da duoc tao, nhung tao phien dau gia that bai: ${auctionError.message}`,
+        );
+      }
+
+      setFormData(createInitialForm());
       setUploadedImageUrls([]);
       setImageUploadKey((prev) => prev + 1);
       setIsAuthenticChecked(false);
@@ -145,8 +217,8 @@ export default function SellAuctionPage() {
 
       const swalResult = await Swal.fire({
         icon: "success",
-        title: "Đăng sản phẩm thành công",
-        text: `Mã sản phẩm: #${createdProduct.id}`,
+        title: "Dang san pham va tao phien dau gia thanh cong",
+        text: `Ma san pham: #${createdProduct.id} | Ma phien: #${createdAuction.id}`,
         confirmButtonText: "Về trang khám phá",
         showCancelButton: true,
         cancelButtonText: "Tiếp tục đăng sản phẩm",
@@ -182,7 +254,7 @@ export default function SellAuctionPage() {
             </h1>
             <p className="text-white/85 text-lg leading-relaxed">
               Tạo phiên đấu giá mới chỉ trong vài phút. Điền thông tin sản phẩm,
-              tải ảnh và đăng trực tiếp qua Product API.
+              tải ảnh, nhập step và đăng trực tiếp qua Product + Auction API.
             </p>
           </div>
         </div>
@@ -227,8 +299,8 @@ export default function SellAuctionPage() {
                 Lưu ý
               </p>
               <p className="font-bold text-sm">
-                Product API hiện quản lý thông tin sản phẩm; các bước đấu giá sẽ
-                mở rộng ở API phiên đấu giá.
+                Product API se tao san pham truoc, sau do Auction API se mo
+                phien dau gia theo step va thoi gian ban nhap.
               </p>
             </div>
           </article>
@@ -385,6 +457,62 @@ export default function SellAuctionPage() {
                   required
                   type="number"
                   value={formData.basePrice}
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  htmlFor="stepPrice"
+                >
+                  Buoc gia (step) *
+                </label>
+                <input
+                  className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-3"
+                  id="stepPrice"
+                  min={1}
+                  name="stepPrice"
+                  onChange={handleInputChange}
+                  placeholder="VD: 50000"
+                  required
+                  type="number"
+                  value={formData.stepPrice}
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  htmlFor="auctionStartTime"
+                >
+                  Bat dau dau gia *
+                </label>
+                <input
+                  className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-3"
+                  id="auctionStartTime"
+                  name="auctionStartTime"
+                  onChange={handleInputChange}
+                  required
+                  type="datetime-local"
+                  value={formData.auctionStartTime}
+                />
+              </div>
+
+              <div>
+                <label
+                  className="block text-sm font-semibold mb-2"
+                  htmlFor="auctionEndTime"
+                >
+                  Ket thuc dau gia *
+                </label>
+                <input
+                  className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-3"
+                  id="auctionEndTime"
+                  name="auctionEndTime"
+                  onChange={handleInputChange}
+                  required
+                  type="datetime-local"
+                  value={formData.auctionEndTime}
                 />
               </div>
 
