@@ -1,8 +1,6 @@
 import { ensureValidAccessToken } from "./authService";
 import { getAccessToken } from "../utils/authStorage";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { apiFetch } from "./httpClient";
 
 function getErrorMessage(responseBody, fallback) {
   if (!responseBody) {
@@ -54,7 +52,7 @@ async function parseResponseBody(response) {
 }
 
 async function getPublic(path, fallbackErrorMessage) {
-  const response = await fetch(`${API_BASE_URL}${path}`);
+  const response = await apiFetch(path);
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
@@ -145,7 +143,7 @@ export async function createProduct(payload) {
   await ensureValidAccessToken();
   const accessToken = getAccessToken();
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/products`, {
+  const response = await apiFetch(`/api/v1/products`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

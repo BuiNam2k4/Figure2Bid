@@ -6,9 +6,7 @@
  */
 import { ensureValidAccessToken } from "./authService";
 import { getAccessToken } from "../utils/authStorage";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { apiFetch, buildApiUrl, withPlatformHeaders } from "./httpClient";
 
 /* ── Configuration ───────────────────────────────────────── */
 
@@ -156,7 +154,10 @@ export async function uploadImage(file, options = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
-    xhr.open("POST", `${API_BASE_URL}/api/v1/uploads/image`);
+    xhr.open("POST", buildApiUrl("/api/v1/uploads/image"));
+    Object.entries(withPlatformHeaders()).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value);
+    });
     xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
 
     // Progress
@@ -296,7 +297,7 @@ export async function uploadImageSimple(file, folder) {
     formData.append("folder", folder);
   }
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/uploads/image`, {
+  const response = await apiFetch(`/api/v1/uploads/image`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -338,8 +339,8 @@ export async function deleteImage(publicId) {
   await ensureValidAccessToken();
   const accessToken = getAccessToken();
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/v1/uploads/image?publicId=${encodeURIComponent(publicId)}`,
+  const response = await apiFetch(
+    `/api/v1/uploads/image?publicId=${encodeURIComponent(publicId)}`,
     {
       method: "DELETE",
       headers: {

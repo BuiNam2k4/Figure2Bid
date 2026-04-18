@@ -1,12 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { getAuctionByProductId } from "../services/auctionService";
-import { listBidsByAuction, placeBid } from "../services/bidService";
+import { listBidsByAuction } from "../services/bidService";
 import { getProductById } from "../services/productService";
-import { hasValidAccessToken } from "../utils/authStorage";
+import { createAuctionBidRealtimeClient } from "../services/realtimeBidService";
+import {
+  hasValidAccessToken,
+  hasValidRefreshToken,
+} from "../utils/authStorage";
 import { APP_ROUTES } from "../utils/legacyRoutes";
 
-const BID_HISTORY_PAGE_SIZE = 10;
+const BID_HISTORY_PAGE_SIZE = 5;
+const REALTIME_BID_CONFIRMATION_TIMEOUT_MS = 10000;
 
 function formatPrice(value) {
   const numericValue = Number(value || 0);
@@ -55,6 +60,64 @@ function formatDate(isoString) {
     month: "2-digit",
     year: "numeric",
   }).format(parsedDate);
+}
+
+function formatCountdown(milliseconds) {
+  const clampedMilliseconds = Math.max(0, milliseconds);
+  const totalSeconds = Math.floor(clampedMilliseconds / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  return [hours, minutes, seconds]
+    .map((part) => String(part).padStart(2, "0"))
+    .join(":");
+}
+
+function buildAuctionTimeInfo(auction, nowMs) {
+  if (!auction) {
+    return {
+      label: "Phien dau gia",
+      value: "Chua mo",
+    };
+  }
+
+  const status = String(auction.status || "").toUpperCase();
+  const startMs = new Date(auction.startTime).getTime();
+  const endMs = new Date(auction.endTime).getTime();
+
+  if (status === "CANCELLED") {
+    return {
+      label: "Phien dau gia",
+      value: "Da huy",
+    };
+  }
+
+  if (!Number.isFinite(endMs)) {
+    return {
+      label: "Thoi gian",
+      value: "--:--:--",
+    };
+  }
+
+  if (status === "ENDED" || nowMs >= endMs) {
+    return {
+      label: "Phien dau gia",
+      value: "Da ket thuc",
+    };
+  }
+
+  if (Number.isFinite(startMs) && nowMs < startMs && status !== "ACTIVE") {
+    return {
+      label: "Bat dau sau",
+      value: formatCountdown(startMs - nowMs),
+    };
+  }
+
+  return {
+    label: "Thoi gian con lai",
+    value: formatCountdown(endMs - nowMs),
+  };
 }
 
 function getStatusBadgeClass(status) {
@@ -130,6 +193,65 @@ function getProductImages(product) {
   return collected.length > 0 ? collected : ["/images/hero.webp"];
 }
 
+function mergeRealtimeBidIntoPage(pageData, realtimeBidEvent) {
+  const normalizedPage = normalizePageResponse(pageData);
+
+  const incomingBid = {
+    id: realtimeBidEvent.bidId,
+    auctionId: realtimeBidEvent.auctionId,
+    userId: realtimeBidEvent.userId,
+    username: realtimeBidEvent.username || "Unknown",
+    bidAmount: Number(realtimeBidEvent.bidAmount || 0),
+    bidTime: realtimeBidEvent.bidTime || new Date().toISOString(),
+  };
+
+  const deduplicated = normalizedPage.content.filter(
+    (bid) => Number(bid?.id) !== Number(incomingBid.id),
+  );
+
+  const nextContent = [incomingBid, ...deduplicated].slice(
+    0,
+    BID_HISTORY_PAGE_SIZE,
+  );
+
+  const totalBidsFromEvent = Number(realtimeBidEvent.totalBids);
+  const nextTotalElements = Number.isFinite(totalBidsFromEvent)
+    ? Math.max(0, totalBidsFromEvent)
+    : Math.max(normalizedPage.totalElements, nextContent.length);
+  const nextTotalPages =
+    nextTotalElements > 0
+      ? Math.ceil(nextTotalElements / BID_HISTORY_PAGE_SIZE)
+      : 0;
+
+  return {
+    ...normalizedPage,
+    content: nextContent,
+    totalElements: nextTotalElements,
+    totalPages: nextTotalPages,
+  };
+}
+
+function patchBidPageMetaFromRealtime(pageData, realtimeBidEvent) {
+  const normalizedPage = normalizePageResponse(pageData);
+  const totalBidsFromEvent = Number(realtimeBidEvent.totalBids);
+
+  if (!Number.isFinite(totalBidsFromEvent)) {
+    return normalizedPage;
+  }
+
+  const nextTotalElements = Math.max(0, totalBidsFromEvent);
+  const nextTotalPages =
+    nextTotalElements > 0
+      ? Math.ceil(nextTotalElements / BID_HISTORY_PAGE_SIZE)
+      : 0;
+
+  return {
+    ...normalizedPage,
+    totalElements: nextTotalElements,
+    totalPages: nextTotalPages,
+  };
+}
+
 export default function AuctionDetailPage() {
   const [searchParams] = useSearchParams();
   const [product, setProduct] = useState(null);
@@ -141,13 +263,46 @@ export default function AuctionDetailPage() {
   const [bidsPage, setBidsPage] = useState(() => normalizePageResponse());
   const [isLoadingBids, setIsLoadingBids] = useState(false);
   const [bidsError, setBidsError] = useState("");
+  const [bidHistoryPageIndex, setBidHistoryPageIndex] = useState(0);
   const [bidAmount, setBidAmount] = useState("");
   const [bidSubmitError, setBidSubmitError] = useState("");
   const [bidSubmitSuccess, setBidSubmitSuccess] = useState("");
   const [isSubmittingBid, setIsSubmittingBid] = useState(false);
+  const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
+  const [realtimeError, setRealtimeError] = useState("");
   const [reloadTick, setReloadTick] = useState(0);
   const [bidRefreshTick, setBidRefreshTick] = useState(0);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
+  const realtimeClientRef = useRef(null);
+  const pendingBidAmountRef = useRef(null);
+  const pendingBidTimeoutRef = useRef(null);
+  const bidHistoryPageIndexRef = useRef(0);
+
+  const clearPendingBidTimeout = useCallback(() => {
+    if (!pendingBidTimeoutRef.current) {
+      return;
+    }
+
+    window.clearTimeout(pendingBidTimeoutRef.current);
+    pendingBidTimeoutRef.current = null;
+  }, []);
+
+  const isAuthenticated = hasValidAccessToken() || hasValidRefreshToken();
+
+  useEffect(() => {
+    const timerId = window.setInterval(() => {
+      setCountdownNowMs(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timerId);
+    };
+  }, []);
+
+  useEffect(() => {
+    bidHistoryPageIndexRef.current = bidHistoryPageIndex;
+  }, [bidHistoryPageIndex]);
 
   const productId = useMemo(() => {
     const rawId = searchParams.get("id");
@@ -264,6 +419,10 @@ export default function AuctionDetailPage() {
   }, [productId, reloadTick, bidRefreshTick]);
 
   useEffect(() => {
+    setBidHistoryPageIndex(0);
+  }, [auction?.id]);
+
+  useEffect(() => {
     let isMounted = true;
 
     const loadBids = async () => {
@@ -279,7 +438,7 @@ export default function AuctionDetailPage() {
 
       try {
         const responsePage = await listBidsByAuction(auction.id, {
-          page: 0,
+          page: bidHistoryPageIndex,
           size: BID_HISTORY_PAGE_SIZE,
           sort: "bidTime,desc",
         });
@@ -308,15 +467,172 @@ export default function AuctionDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [auction?.id, reloadTick, bidRefreshTick]);
+  }, [auction?.id, bidHistoryPageIndex, reloadTick, bidRefreshTick]);
 
-  const isAuthenticated = hasValidAccessToken();
+  useEffect(() => {
+    const activeAuctionId = auction?.id;
+
+    if (!activeAuctionId || !isAuthenticated) {
+      setIsRealtimeConnected(false);
+      setRealtimeError("");
+      return;
+    }
+
+    let isDisposed = false;
+
+    const connectRealtime = async () => {
+      setRealtimeError("");
+
+      try {
+        const realtimeClient = await createAuctionBidRealtimeClient({
+          auctionId: activeAuctionId,
+          onConnectionChange: (status) => {
+            if (isDisposed) {
+              return;
+            }
+
+            const isConnected = status === "connected";
+            setIsRealtimeConnected(isConnected);
+
+            if (!isConnected && pendingBidAmountRef.current !== null) {
+              clearPendingBidTimeout();
+              pendingBidAmountRef.current = null;
+              setIsSubmittingBid(false);
+              setBidSubmitError(
+                "Ket noi realtime bi gian doan. Vui long dat gia lai.",
+              );
+            }
+          },
+          onError: (message) => {
+            if (isDisposed) {
+              return;
+            }
+
+            const resolvedMessage =
+              message || "Dat gia realtime that bai. Vui long thu lai.";
+            setRealtimeError(resolvedMessage);
+
+            if (pendingBidAmountRef.current !== null) {
+              clearPendingBidTimeout();
+              pendingBidAmountRef.current = null;
+              setIsSubmittingBid(false);
+              setBidSubmitError(resolvedMessage);
+              setBidRefreshTick((prev) => prev + 1);
+            }
+          },
+          onBidEvent: (realtimeBidEvent) => {
+            if (isDisposed) {
+              return;
+            }
+
+            if (
+              Number(realtimeBidEvent.auctionId) !== Number(activeAuctionId)
+            ) {
+              return;
+            }
+
+            setAuction((previousAuction) => {
+              if (
+                !previousAuction ||
+                Number(previousAuction.id) !==
+                  Number(realtimeBidEvent.auctionId)
+              ) {
+                return previousAuction;
+              }
+
+              return {
+                ...previousAuction,
+                currentPrice: realtimeBidEvent.currentPrice,
+                totalBids: realtimeBidEvent.totalBids,
+                status: realtimeBidEvent.status || previousAuction.status,
+              };
+            });
+
+            const activeBidHistoryPage = bidHistoryPageIndexRef.current;
+            setBidsPage((previousPage) => {
+              if (activeBidHistoryPage === 0) {
+                return mergeRealtimeBidIntoPage(previousPage, realtimeBidEvent);
+              }
+
+              return patchBidPageMetaFromRealtime(
+                previousPage,
+                realtimeBidEvent,
+              );
+            });
+            setIsLoadingBids(false);
+            setBidsError("");
+            setRealtimeError("");
+
+            if (
+              pendingBidAmountRef.current !== null &&
+              Number(pendingBidAmountRef.current) ===
+                Number(realtimeBidEvent.bidAmount)
+            ) {
+              clearPendingBidTimeout();
+              pendingBidAmountRef.current = null;
+              setIsSubmittingBid(false);
+              setBidSubmitError("");
+              setBidSubmitSuccess(
+                `Dat gia thanh cong: ${formatPrice(realtimeBidEvent.bidAmount)}.`,
+              );
+              setBidAmount("");
+            }
+          },
+        });
+
+        if (isDisposed) {
+          await realtimeClient.disconnect();
+          return;
+        }
+
+        realtimeClientRef.current = realtimeClient;
+      } catch (connectError) {
+        if (isDisposed) {
+          return;
+        }
+
+        setIsRealtimeConnected(false);
+        setRealtimeError(
+          connectError.message || "Khong the ket noi realtime bidding.",
+        );
+      }
+    };
+
+    connectRealtime();
+
+    return () => {
+      isDisposed = true;
+      clearPendingBidTimeout();
+      pendingBidAmountRef.current = null;
+
+      const activeRealtimeClient = realtimeClientRef.current;
+      realtimeClientRef.current = null;
+      if (activeRealtimeClient) {
+        void activeRealtimeClient.disconnect();
+      }
+
+      setIsRealtimeConnected(false);
+    };
+  }, [auction?.id, clearPendingBidTimeout, isAuthenticated]);
+
   const imageUrls = useMemo(() => getProductImages(product), [product]);
   const selectedImage =
     imageUrls[
       Math.min(selectedImageIndex, Math.max(0, imageUrls.length - 1))
     ] || "/images/hero.webp";
   const latestBids = bidsPage.content;
+  const bidHistoryTotalPages = Math.max(0, Number(bidsPage.totalPages || 0));
+  const bidHistoryTotalElements = Math.max(
+    0,
+    Number(bidsPage.totalElements || 0),
+  );
+  const canGoToPreviousBidPage = bidHistoryPageIndex > 0;
+  const canGoToNextBidPage =
+    bidHistoryTotalPages > 0 && bidHistoryPageIndex + 1 < bidHistoryTotalPages;
+  const auctionTimeInfo = useMemo(
+    () => buildAuctionTimeInfo(auction, countdownNowMs),
+    [auction, countdownNowMs],
+  );
   const isAuctionActive =
     String(auction?.status || "").toUpperCase() === "ACTIVE";
 
@@ -383,25 +699,49 @@ export default function AuctionDetailPage() {
       return;
     }
 
+    const realtimeClient = realtimeClientRef.current;
+    if (!realtimeClient || !realtimeClient.isConnected()) {
+      setBidSubmitError(
+        "Realtime bidding chua san sang. Vui long doi ket noi roi thu lai.",
+      );
+      return;
+    }
+
     setIsSubmittingBid(true);
+    setRealtimeError("");
 
     try {
-      const placedBid = await placeBid({
-        auctionId: auction.id,
-        bidAmount: numericBidAmount,
-      });
+      await realtimeClient.publishBid(numericBidAmount);
 
-      setBidAmount("");
-      setBidSubmitSuccess(
-        `Dat gia thanh cong: ${formatPrice(placedBid.bidAmount)}.`,
-      );
-      setBidRefreshTick((prev) => prev + 1);
+      clearPendingBidTimeout();
+      pendingBidAmountRef.current = numericBidAmount;
+      pendingBidTimeoutRef.current = window.setTimeout(() => {
+        if (pendingBidAmountRef.current === null) {
+          return;
+        }
+
+        pendingBidAmountRef.current = null;
+        pendingBidTimeoutRef.current = null;
+        setIsSubmittingBid(false);
+        setBidSubmitError(
+          "Khong nhan duoc xac nhan realtime. Vui long thu lai.",
+        );
+        setBidRefreshTick((prev) => prev + 1);
+      }, REALTIME_BID_CONFIRMATION_TIMEOUT_MS);
     } catch (requestError) {
-      setBidSubmitError(requestError.message || "Dat gia that bai.");
-    } finally {
+      clearPendingBidTimeout();
+      pendingBidAmountRef.current = null;
       setIsSubmittingBid(false);
+      setBidSubmitError(requestError.message || "Dat gia that bai.");
     }
   };
+
+  useEffect(() => {
+    return () => {
+      clearPendingBidTimeout();
+      pendingBidAmountRef.current = null;
+    };
+  }, [clearPendingBidTimeout]);
 
   if (isLoading) {
     return (
@@ -475,7 +815,7 @@ export default function AuctionDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <section className="lg:col-span-7 space-y-6">
-          <div className="rounded-2xl overflow-hidden bg-surface-container aspect-[4/5]">
+          <div className="relative rounded-2xl overflow-hidden bg-surface-container aspect-[4/5]">
             <img
               alt={product.name}
               className="w-full h-full object-cover"
@@ -607,15 +947,27 @@ export default function AuctionDetailPage() {
                     <h3 className="font-headline text-xl font-bold">Dat gia</h3>
                   </div>
 
-                  {auction && (
+                  <div className="flex flex-col items-end gap-2">
+                    {auction && (
+                      <span
+                        className={`text-xs px-2.5 py-1 rounded-full font-bold ${getAuctionStatusBadgeClass(
+                          auction.status,
+                        )}`}
+                      >
+                        {String(auction.status || "UNKNOWN").toUpperCase()}
+                      </span>
+                    )}
+
                     <span
-                      className={`text-xs px-2.5 py-1 rounded-full font-bold ${getAuctionStatusBadgeClass(
-                        auction.status,
-                      )}`}
+                      className={`text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-widest ${
+                        isRealtimeConnected
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
                     >
-                      {String(auction.status || "UNKNOWN").toUpperCase()}
+                      {isRealtimeConnected ? "Realtime ON" : "Realtime OFF"}
                     </span>
-                  )}
+                  </div>
                 </div>
 
                 {isLoadingAuction ? (
@@ -678,12 +1030,25 @@ export default function AuctionDetailPage() {
 
                     <form className="space-y-3" onSubmit={handlePlaceBid}>
                       <div>
-                        <label
-                          className="block text-sm font-semibold mb-2"
-                          htmlFor="bidAmount"
-                        >
-                          Gia ban muon dat
-                        </label>
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <label
+                            className="block text-sm font-semibold"
+                            htmlFor="bidAmount"
+                          >
+                            Gia ban muon dat
+                          </label>
+                          <div className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-2.5 py-1">
+                            <span className="material-symbols-outlined text-sm leading-none text-red-500">
+                              schedule
+                            </span>
+                            <span className="text-[10px] uppercase tracking-widest font-bold text-red-400">
+                              {auctionTimeInfo.label}
+                            </span>
+                            <span className="font-bold tabular-nums text-red-600">
+                              {auctionTimeInfo.value}
+                            </span>
+                          </div>
+                        </div>
                         <input
                           className="w-full rounded-lg border border-outline-variant/40 bg-surface-container-lowest px-4 py-2.5"
                           autoComplete="off"
@@ -715,6 +1080,12 @@ export default function AuctionDetailPage() {
                         </p>
                       )}
 
+                      {realtimeError && (
+                        <p className="rounded-lg border border-amber-300/50 bg-amber-100/40 px-3 py-2 text-sm text-amber-700">
+                          {realtimeError}
+                        </p>
+                      )}
+
                       {!isAuthenticated && (
                         <p className="text-sm text-on-surface-variant">
                           Vui long{" "}
@@ -736,13 +1107,23 @@ export default function AuctionDetailPage() {
                         </p>
                       )}
 
+                      {isAuthenticated &&
+                        isAuctionActive &&
+                        !isRealtimeConnected && (
+                          <p className="text-sm text-on-surface-variant">
+                            Dang ket noi kenh realtime... vui long doi trong
+                            giay lat.
+                          </p>
+                        )}
+
                       <button
                         className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white disabled:opacity-60 disabled:cursor-not-allowed"
                         disabled={
                           isSubmittingBid ||
                           !isAuthenticated ||
                           !isAuctionActive ||
-                          !auction
+                          !auction ||
+                          !isRealtimeConnected
                         }
                         type="submit"
                       >
@@ -752,14 +1133,24 @@ export default function AuctionDetailPage() {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-3">
-                        <h4 className="font-semibold">Lich su bid moi nhat</h4>
-                        <button
-                          className="text-xs font-semibold text-primary hover:underline"
-                          onClick={() => setBidRefreshTick((prev) => prev + 1)}
-                          type="button"
-                        >
-                          Lam moi
-                        </button>
+                        <h4 className="font-semibold">Lich su bid</h4>
+                        <div className="flex items-center gap-2">
+                          {bidHistoryTotalPages > 0 && (
+                            <span className="text-[11px] text-on-surface-variant">
+                              Trang {bidHistoryPageIndex + 1}/
+                              {bidHistoryTotalPages}
+                            </span>
+                          )}
+                          <button
+                            className="text-xs font-semibold text-primary hover:underline"
+                            onClick={() =>
+                              setBidRefreshTick((prev) => prev + 1)
+                            }
+                            type="button"
+                          >
+                            Lam moi
+                          </button>
+                        </div>
                       </div>
 
                       {isLoadingBids ? (
@@ -775,26 +1166,74 @@ export default function AuctionDetailPage() {
                           Chua co luot dat gia nao.
                         </p>
                       ) : (
-                        <ul className="space-y-2">
-                          {latestBids.map((bid) => (
-                            <li
-                              key={bid.id}
-                              className="rounded-lg bg-surface-container px-3 py-2.5 text-sm"
-                            >
-                              <div className="flex items-center justify-between gap-3">
-                                <p className="font-semibold truncate">
-                                  {bid.username || "Unknown"}
+                        <>
+                          <ul className="space-y-2">
+                            {latestBids.map((bid) => (
+                              <li
+                                key={bid.id}
+                                className="rounded-lg bg-surface-container px-3 py-2.5 text-sm"
+                              >
+                                <div className="flex items-center justify-between gap-3">
+                                  <p className="font-semibold truncate">
+                                    {bid.username || "Unknown"}
+                                  </p>
+                                  <p className="font-bold text-primary">
+                                    {formatPrice(bid.bidAmount)}
+                                  </p>
+                                </div>
+                                <p className="text-xs text-on-surface-variant mt-1">
+                                  {formatDate(bid.bidTime)}
                                 </p>
-                                <p className="font-bold text-primary">
-                                  {formatPrice(bid.bidAmount)}
-                                </p>
-                              </div>
-                              <p className="text-xs text-on-surface-variant mt-1">
-                                {formatDate(bid.bidTime)}
-                              </p>
-                            </li>
-                          ))}
-                        </ul>
+                              </li>
+                            ))}
+                          </ul>
+
+                          <div className="flex items-center justify-between gap-3 pt-1">
+                            <p className="text-xs text-on-surface-variant">
+                              Tong {bidHistoryTotalElements} luot bid
+                            </p>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                className="inline-flex items-center rounded-md border border-outline-variant/40 bg-surface-container-low px-2.5 py-1 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={
+                                  !canGoToPreviousBidPage || isLoadingBids
+                                }
+                                onClick={() =>
+                                  setBidHistoryPageIndex((previousPage) =>
+                                    Math.max(0, previousPage - 1),
+                                  )
+                                }
+                                type="button"
+                              >
+                                Truoc
+                              </button>
+
+                              <span className="text-xs font-semibold text-on-surface-variant min-w-[70px] text-center">
+                                {bidHistoryTotalPages > 0
+                                  ? `${bidHistoryPageIndex + 1}/${bidHistoryTotalPages}`
+                                  : "0/0"}
+                              </span>
+
+                              <button
+                                className="inline-flex items-center rounded-md border border-outline-variant/40 bg-surface-container-low px-2.5 py-1 text-xs font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!canGoToNextBidPage || isLoadingBids}
+                                onClick={() =>
+                                  setBidHistoryPageIndex((previousPage) => {
+                                    const maxPage = Math.max(
+                                      0,
+                                      bidHistoryTotalPages - 1,
+                                    );
+                                    return Math.min(maxPage, previousPage + 1);
+                                  })
+                                }
+                                type="button"
+                              >
+                                Sau
+                              </button>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   </>

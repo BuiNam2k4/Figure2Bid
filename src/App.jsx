@@ -10,7 +10,6 @@ import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
 import ExplorePage from "./pages/ExplorePage";
 import HomePage from "./pages/HomePage";
-import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import NewsPage from "./pages/NewsPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -27,7 +26,7 @@ export default function App() {
         <Route element={<SiteLayout />}>
           <Route index element={<RootPage />} />
           <Route path="home" element={<HomePage />} />
-          <Route path="landing" element={<LandingPage />} />
+
           <Route path="explore" element={<ExplorePage />} />
           <Route path="news" element={<NewsPage />} />
           <Route path="auction-detail" element={<AuctionDetailPage />} />

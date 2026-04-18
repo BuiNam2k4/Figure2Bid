@@ -5,9 +5,7 @@ import {
   hasValidRefreshToken,
   saveAuthSession,
 } from "../utils/authStorage";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { apiFetch } from "./httpClient";
 
 function getErrorMessage(responseBody, fallback) {
   if (!responseBody) {
@@ -36,7 +34,7 @@ function getErrorMessage(responseBody, fallback) {
 }
 
 async function postAuth(path, payload, fallbackErrorMessage) {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await apiFetch(path, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

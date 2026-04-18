@@ -1,8 +1,6 @@
 import { ensureValidAccessToken } from "./authService";
 import { getAccessToken } from "../utils/authStorage";
-
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+import { apiFetch } from "./httpClient";
 
 function getErrorMessage(responseBody, fallback) {
   if (!responseBody) {
@@ -53,7 +51,7 @@ async function parseResponseBody(response) {
 }
 
 async function getPublic(path, fallbackErrorMessage) {
-  const response = await fetch(`${API_BASE_URL}${path}`);
+  const response = await apiFetch(path);
   const responseBody = await parseResponseBody(response);
 
   if (!response.ok) {
@@ -170,8 +168,8 @@ export async function listMyAuctions({
   await ensureValidAccessToken();
   const accessToken = getAccessToken();
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/v1/auctions/my${buildQueryString({ page, size, sort })}`,
+  const response = await apiFetch(
+    `/api/v1/auctions/my${buildQueryString({ page, size, sort })}`,
     {
       method: "GET",
       headers: {
@@ -195,7 +193,7 @@ export async function createAuction(payload) {
   await ensureValidAccessToken();
   const accessToken = getAccessToken();
 
-  const response = await fetch(`${API_BASE_URL}/api/v1/auctions`, {
+  const response = await apiFetch(`/api/v1/auctions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -225,8 +223,8 @@ export async function updateAuction(auctionId, payload) {
   await ensureValidAccessToken();
   const accessToken = getAccessToken();
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/v1/auctions/${encodeURIComponent(String(auctionId))}`,
+  const response = await apiFetch(
+    `/api/v1/auctions/${encodeURIComponent(String(auctionId))}`,
     {
       method: "PUT",
       headers: {
@@ -260,8 +258,8 @@ export async function deleteAuction(auctionId) {
   await ensureValidAccessToken();
   const accessToken = getAccessToken();
 
-  const response = await fetch(
-    `${API_BASE_URL}/api/v1/auctions/${encodeURIComponent(String(auctionId))}`,
+  const response = await apiFetch(
+    `/api/v1/auctions/${encodeURIComponent(String(auctionId))}`,
     {
       method: "DELETE",
       headers: {

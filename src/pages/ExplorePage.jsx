@@ -574,6 +574,11 @@ export default function ExplorePage() {
                 ).toUpperCase();
                 const statusLabel = getProductStatusOverlayLabel(auctionStatus);
                 const timeInfo = buildAuctionTimeInfo(auction, countdownNowMs);
+                const sellerUsername =
+                  auction?.sellerUsername ||
+                  product?.sellerUsername ||
+                  "Unknown";
+                const totalBids = Number(auction?.totalBids || 0);
                 const currentPriceText =
                   auction &&
                   auction.currentPrice !== undefined &&
@@ -622,27 +627,20 @@ export default function ExplorePage() {
                     <div className="p-6">
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <p className="font-label text-xs text-slate-500 uppercase tracking-widest">
-                          {(product.categoryName || "UNCATEGORIZED").slice(0, 26)}
+                          Seller: {sellerUsername}
                         </p>
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded font-bold ${getStatusBadgeClass(
                             auctionStatus,
                           )}`}
                         >
-                          {statusLabel}
+                          {auctionStatus}
                         </span>
                       </div>
 
-                      <h2 className="font-headline font-bold text-lg mb-4 group-hover:text-primary transition-colors min-h-[56px]">
+                      <h3 className="font-headline font-bold text-lg mb-4 group-hover:text-primary transition-colors min-h-[56px]">
                         {product.name}
-                      </h2>
-
-                      <p className="text-sm text-on-surface-variant mb-4 min-h-[42px]">
-                        {String(product.description || "").slice(0, 80)}
-                        {String(product.description || "").length > 80
-                          ? "..."
-                          : ""}
-                      </p>
+                      </h3>
 
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex flex-col">
@@ -653,7 +651,7 @@ export default function ExplorePage() {
                             {currentPriceText}
                           </span>
                           <span className="font-label text-[10px] text-on-surface-variant uppercase mt-1">
-                            {auctionStatus}
+                            {totalBids} luot bid
                           </span>
                         </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { listAuctions } from "../services/auctionService";
+import { getProductById } from "../services/productService";
 import { APP_ROUTES } from "../utils/legacyRoutes";
 
 const HOME_AUCTIONS_PAGE_SIZE = 24;
@@ -95,17 +96,27 @@ function buildAuctionTimeInfo(auction, nowMs) {
   };
 }
 
-function getAuctionCardImage(auction, index) {
+function pickFirstValidImage(candidates) {
+  return candidates.find(
+    (url) => typeof url === "string" && url.trim().length > 0,
+  );
+}
+
+function getProductPrimaryImage(product) {
+  const imageUrls = Array.isArray(product?.imageUrls) ? product.imageUrls : [];
+  return pickFirstValidImage([product?.mainImageUrl, ...imageUrls]);
+}
+
+function getAuctionCardImage(auction, index, resolvedProductImageUrl) {
   const candidates = [
+    resolvedProductImageUrl,
     auction?.productImageUrl,
     auction?.mainImageUrl,
     auction?.imageUrl,
     auction?.thumbnailUrl,
   ];
 
-  const fromApi = candidates.find(
-    (url) => typeof url === "string" && url.trim().length > 0,
-  );
+  const fromApi = pickFirstValidImage(candidates);
 
   if (fromApi) {
     return fromApi;
@@ -138,6 +149,7 @@ function getAuctionStatusLabel(status) {
 
 export default function HomePage() {
   const [auctions, setAuctions] = useState([]);
+  const [productImageByProductId, setProductImageByProductId] = useState({});
   const [isLoadingAuctions, setIsLoadingAuctions] = useState(true);
   const [auctionError, setAuctionError] = useState("");
   const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
@@ -230,6 +242,55 @@ export default function HomePage() {
       isMounted = false;
     };
   }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadProductImagesForAuctions = async () => {
+      const uniqueProductIds = Array.from(
+        new Set(
+          auctions
+            .map((auction) => Number(auction?.productId))
+            .filter((productId) => Number.isFinite(productId) && productId > 0),
+        ),
+      );
+
+      if (uniqueProductIds.length === 0) {
+        setProductImageByProductId({});
+        return;
+      }
+
+      const productResponses = await Promise.allSettled(
+        uniqueProductIds.map((productId) => getProductById(productId)),
+      );
+
+      if (!isMounted) {
+        return;
+      }
+
+      const nextProductImageMap = {};
+      productResponses.forEach((response, index) => {
+        if (response.status !== "fulfilled") {
+          return;
+        }
+
+        const imageUrl = getProductPrimaryImage(response.value);
+        if (!imageUrl) {
+          return;
+        }
+
+        nextProductImageMap[uniqueProductIds[index]] = imageUrl;
+      });
+
+      setProductImageByProductId(nextProductImageMap);
+    };
+
+    loadProductImagesForAuctions();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [auctions]);
 
   const auctionItems = useMemo(() => {
     const seenAuctionIds = new Set();
@@ -379,7 +440,11 @@ export default function HomePage() {
                     <img
                       alt={auction.productName || "Auction item"}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      src={getAuctionCardImage(auction, index)}
+                      src={getAuctionCardImage(
+                        auction,
+                        index,
+                        productImageByProductId[auction?.productId],
+                      )}
                     />
 
                     <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-red-400/40 shadow-lg shadow-red-600/20">
