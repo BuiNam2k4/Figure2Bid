@@ -25,37 +25,141 @@ function parseContentBlocks(value) {
   }
 
   const blocks = [];
-  const imagePattern = /!\[[^\]]*\]\(([^)]+)\)/g;
-  let lastIndex = 0;
-  let match = imagePattern.exec(value);
+  const linkedImagePattern = /^\[!\[[^\]]*\]\s*\(([^)]+)\)\]\s*\(([^)]+)\)/;
+  const imagePattern = /^!\[[^\]]*\]\s*\(([^)]+)\)/;
+  const headingPattern = /^(#{1,6})\s+(.*)$/;
 
-  const pushTextBlock = (text) => {
-    text
-      .split(/\n{2,}|\r\n{2,}/)
-      .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
-      .filter(Boolean)
-      .forEach((paragraph) => blocks.push({ type: "text", value: paragraph }));
-  };
+  value.split(/\r?\n/).forEach((rawLine) => {
+    const line = rawLine.trim();
+    if (!line) {
+      return;
+    }
+
+    const headingMatch = line.match(headingPattern);
+    if (headingMatch) {
+      blocks.push({
+        type: "heading",
+        level: headingMatch[1].length,
+        value: headingMatch[2].trim(),
+      });
+      return;
+    }
+
+    const linkedImageMatch = line.match(linkedImagePattern);
+    if (linkedImageMatch) {
+      blocks.push({
+        type: "image",
+        value: linkedImageMatch[1],
+        link: linkedImageMatch[2],
+      });
+      return;
+    }
+
+    const imageMatch = line.match(imagePattern);
+    if (imageMatch) {
+      blocks.push({ type: "image", value: imageMatch[1] });
+      return;
+    }
+
+    blocks.push({ type: "text", value: line });
+  });
+
+  return blocks;
+}
+
+function renderInlineMarkdown(value) {
+  if (!value) {
+    return null;
+  }
+
+  const nodes = [];
+  const pattern =
+    /\[!\[[^\]]*\]\s*\(([^)]+)\)\]\s*\(([^)]+)\)|!\[[^\]]*\]\s*\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\)/g;
+  let lastIndex = 0;
+  let match = pattern.exec(value);
+
+  const isExternalLink = (href) => /^https?:\/\//i.test(href);
 
   while (match) {
     const matchIndex = match.index;
     const before = value.slice(lastIndex, matchIndex);
-    if (before.trim()) {
-      pushTextBlock(before);
+    if (before) {
+      nodes.push(before);
     }
 
-    blocks.push({ type: "image", value: match[1] });
+    if (match[1]) {
+      const imageUrl = match[1];
+      const linkUrl = match[2];
+      const imageNode = (
+        <img
+          alt=""
+          className="my-4 w-full rounded-2xl object-cover"
+          src={imageUrl}
+        />
+      );
+      if (linkUrl) {
+        nodes.push(
+          <a
+            key={`${linkUrl}-${matchIndex}`}
+            href={linkUrl}
+            className="text-inherit no-underline"
+            target={isExternalLink(linkUrl) ? "_blank" : undefined}
+            rel={isExternalLink(linkUrl) ? "noreferrer" : undefined}
+          >
+            {imageNode}
+          </a>,
+        );
+      } else {
+        nodes.push(imageNode);
+      }
+    } else if (match[3]) {
+      const imageUrl = match[3];
+      nodes.push(
+        <img
+          key={`${imageUrl}-${matchIndex}`}
+          alt=""
+          className="my-4 w-full rounded-2xl object-cover"
+          src={imageUrl}
+        />,
+      );
+    } else {
+      const label = match[4];
+      const href = match[5];
+      if (href && href.startsWith("/")) {
+        nodes.push(
+          <Link
+            key={`${href}-${matchIndex}`}
+            to={href}
+            className="text-inherit no-underline"
+          >
+            {label}
+          </Link>,
+        );
+      } else {
+        nodes.push(
+          <a
+            key={`${href}-${matchIndex}`}
+            href={href}
+            className="text-inherit no-underline"
+            target={isExternalLink(href) ? "_blank" : undefined}
+            rel={isExternalLink(href) ? "noreferrer" : undefined}
+          >
+            {label}
+          </a>,
+        );
+      }
+    }
 
     lastIndex = matchIndex + match[0].length;
-    match = imagePattern.exec(value);
+    match = pattern.exec(value);
   }
 
   const remaining = value.slice(lastIndex);
-  if (remaining.trim()) {
-    pushTextBlock(remaining);
+  if (remaining) {
+    nodes.push(remaining);
   }
 
-  return blocks;
+  return nodes;
 }
 
 export default function NewsDetailPage() {
@@ -157,17 +261,55 @@ export default function NewsDetailPage() {
             {contentBlocks.length > 0 ? (
               contentBlocks.map((block, index) => {
                 if (block.type === "image") {
-                  return (
+                  const imageNode = (
                     <img
-                      key={`${article.id}-img-${index}`}
                       alt={article.title}
                       className="w-full rounded-2xl object-cover"
                       src={block.value}
                     />
                   );
+                  if (block.link) {
+                    return (
+                      <a
+                        key={`${article.id}-img-${index}`}
+                        href={block.link}
+                        className="text-inherit no-underline"
+                        target={
+                          block.link.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                          block.link.startsWith("http")
+                            ? "noreferrer"
+                            : undefined
+                        }
+                      >
+                        {imageNode}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <div key={`${article.id}-img-${index}`}>{imageNode}</div>
+                  );
                 }
 
-                return <p key={`${article.id}-p-${index}`}>{block.value}</p>;
+                if (block.type === "heading") {
+                  const HeadingTag = `h${block.level}`;
+                  return (
+                    <HeadingTag
+                      key={`${article.id}-h-${index}`}
+                      className="font-headline text-2xl font-bold text-on-surface"
+                    >
+                      {renderInlineMarkdown(block.value)}
+                    </HeadingTag>
+                  );
+                }
+
+                return (
+                  <p key={`${article.id}-p-${index}`}>
+                    {renderInlineMarkdown(block.value)}
+                  </p>
+                );
               })
             ) : (
               <p>Chua co noi dung chi tiet cho bai viet nay.</p>

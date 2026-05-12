@@ -957,6 +957,96 @@ function ContentSection() {
       return "";
     };
 
+    const findImageUrlInNode = (node) => {
+      if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+        return "";
+      }
+
+      if (node.tagName === "IMG") {
+        return getImageUrl(node);
+      }
+
+      const img = node.querySelector("img");
+      return img ? getImageUrl(img) : "";
+    };
+
+    const getImageLinkFromNode = (node) => {
+      if (!node || node.nodeType !== Node.ELEMENT_NODE) {
+        return "";
+      }
+
+      const anchor = node.closest?.("a");
+      if (anchor?.getAttribute) {
+        const href = anchor.getAttribute("href");
+        if (href) {
+          return href;
+        }
+      }
+
+      return (
+        node.getAttribute("data-href") ||
+        node.getAttribute("data-link") ||
+        node.getAttribute("data-url") ||
+        ""
+      );
+    };
+
+    const walkInline = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        return (node.textContent || "").replace(/\s+/g, " ");
+      }
+
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return "";
+      }
+
+      const element = node;
+
+      if (element.tagName === "IMG") {
+        const url = getImageUrl(element);
+        const link = getImageLinkFromNode(element);
+        if (!url) {
+          return "";
+        }
+        if (link) {
+          return ` [![news-image](${url})](${link}) `;
+        }
+        return ` ![news-image](${url}) `;
+      }
+
+      if (element.tagName === "BR") {
+        return "\n";
+      }
+
+      if (element.tagName === "A") {
+        const href = element.getAttribute("href") || "";
+        const imgUrl = findImageUrlInNode(element);
+        if (href && imgUrl) {
+          return `[![news-image](${imgUrl})](${href})`;
+        }
+
+        const label = Array.from(element.childNodes)
+          .map(walkInline)
+          .join("")
+          .trim();
+
+        if (!href) {
+          return label;
+        }
+
+        return label ? `[${label}](${href})` : href;
+      }
+
+      return Array.from(element.childNodes).map(walkInline).join("");
+    };
+
+    const pushHeading = (element, level) => {
+      const label = walkInline(element).replace(/\s+/g, " ").trim();
+      if (label) {
+        parts.push(`${"#".repeat(level)} ${label}`);
+      }
+    };
+
     const walk = (node) => {
       if (node.nodeType === Node.TEXT_NODE) {
         pushText(node.textContent || "");
@@ -969,12 +1059,69 @@ function ContentSection() {
 
       const element = node;
 
+      if (element.tagName === "A") {
+        const href = element.getAttribute("href") || "";
+        const imgUrl = findImageUrlInNode(element);
+        if (href && imgUrl) {
+          parts.push(`[![news-image](${imgUrl})](${href})`);
+          return;
+        }
+      }
+
       if (element.tagName === "IMG") {
-        pushImage(getImageUrl(element));
+        const imgUrl = getImageUrl(element);
+        const imgLink = getImageLinkFromNode(element);
+        if (imgLink && imgUrl) {
+          parts.push(`[![news-image](${imgUrl})](${imgLink})`);
+          return;
+        }
+        pushImage(imgUrl);
         return;
       }
 
       if (element.tagName === "BR") {
+        parts.push("");
+        return;
+      }
+
+      if (element.tagName === "H1") {
+        parts.push("");
+        pushHeading(element, 1);
+        parts.push("");
+        return;
+      }
+
+      if (element.tagName === "H2") {
+        parts.push("");
+        pushHeading(element, 2);
+        parts.push("");
+        return;
+      }
+
+      if (element.tagName === "H3") {
+        parts.push("");
+        pushHeading(element, 3);
+        parts.push("");
+        return;
+      }
+
+      if (element.tagName === "H4") {
+        parts.push("");
+        pushHeading(element, 4);
+        parts.push("");
+        return;
+      }
+
+      if (element.tagName === "H5") {
+        parts.push("");
+        pushHeading(element, 5);
+        parts.push("");
+        return;
+      }
+
+      if (element.tagName === "H6") {
+        parts.push("");
+        pushHeading(element, 6);
         parts.push("");
         return;
       }
@@ -984,7 +1131,14 @@ function ContentSection() {
         parts.push("");
       }
 
-      Array.from(element.childNodes).forEach(walk);
+      if (element.tagName === "P" || element.tagName === "LI") {
+        const inlineText = walkInline(element).replace(/\s+/g, " ").trim();
+        if (inlineText) {
+          parts.push(inlineText);
+        }
+      } else {
+        Array.from(element.childNodes).forEach(walk);
+      }
 
       if (isBlock) {
         parts.push("");
