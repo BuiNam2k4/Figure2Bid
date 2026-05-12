@@ -109,6 +109,17 @@ export function getNewsById(newsId) {
   );
 }
 
+export function getNewsBySlug(slug) {
+  if (!slug || !String(slug).trim()) {
+    throw new Error("Thieu slug bai viet.");
+  }
+
+  return getPublic(
+    `/api/v1/news/slug/${encodeURIComponent(String(slug).trim())}`,
+    "Khong the tai bai viet.",
+  );
+}
+
 export async function createNews(payload) {
   await ensureValidAccessToken();
   const accessToken = getAccessToken();

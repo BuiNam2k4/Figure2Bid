@@ -30,7 +30,7 @@ export default function App() {
 
           <Route path="explore" element={<ExplorePage />} />
           <Route path="news" element={<NewsPage />} />
-          <Route path="news/:id" element={<NewsDetailPage />} />
+          <Route path="news/:slug" element={<NewsDetailPage />} />
           <Route path="auction-detail" element={<AuctionDetailPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="admin/login" element={<AdminLoginPage />} />

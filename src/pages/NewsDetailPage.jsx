@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getNewsById } from "../services/newsService";
+import { getNewsBySlug } from "../services/newsService";
 
 function formatDate(value) {
   if (!value) {
@@ -163,10 +163,36 @@ function renderInlineMarkdown(value) {
 }
 
 export default function NewsDetailPage() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [article, setArticle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [visibleAds, setVisibleAds] = useState({ left: true, right: true });
+  const [isCenterAdVisible, setIsCenterAdVisible] = useState(true);
+
+  const adCloseLink = "https://shorten.asia/Q9pEU9xh";
+
+  const handleCloseAd = (position) => {
+    setVisibleAds((prev) => ({ ...prev, [position]: false }));
+    window.open(adCloseLink, "_blank", "noopener,noreferrer");
+  };
+
+  const handleCloseCenterAd = () => {
+    setIsCenterAdVisible(false);
+    window.open(adCloseLink, "_blank", "noopener,noreferrer");
+  };
+
+  useEffect(() => {
+    if (!slug) {
+      return undefined;
+    }
+
+    const interval = setInterval(() => {
+      setIsCenterAdVisible(true);
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, [slug]);
 
   useEffect(() => {
     let isMounted = true;
@@ -176,7 +202,7 @@ export default function NewsDetailPage() {
       setError("");
 
       try {
-        const data = await getNewsById(id);
+        const data = await getNewsBySlug(slug);
 
         if (!isMounted) {
           return;
@@ -199,7 +225,7 @@ export default function NewsDetailPage() {
     return () => {
       isMounted = false;
     };
-  }, [id]);
+  }, [slug]);
 
   const contentBlocks = useMemo(
     () => parseContentBlocks(article?.content || article?.summary || ""),
@@ -208,6 +234,112 @@ export default function NewsDetailPage() {
 
   return (
     <main className="pt-24 pb-20 px-6 max-w-[1100px] mx-auto">
+      <button
+        type="button"
+        onClick={() => {
+          window.open("/explore", "_blank", "noopener,noreferrer");
+          window.open(
+            "https://shorten.asia/Q9pEU9xh",
+            "_blank",
+            "noopener,noreferrer",
+          );
+        }}
+        className="fixed bottom-6 right-6 z-50 rounded-full bg-primary px-5 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-lg opacity-80 transition-opacity hover:opacity-100 animate-pulse"
+        aria-label="Chot don ngay"
+      >
+        Chot don ngay
+      </button>
+      {isCenterAdVisible ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="relative w-full max-w-3xl overflow-hidden rounded-3xl border border-outline-variant/40 bg-surface-container-lowest shadow-2xl">
+            <button
+              type="button"
+              onClick={handleCloseCenterAd}
+              className="absolute right-4 top-4 h-9 w-9 rounded-full border border-outline-variant/40 bg-white text-sm font-bold text-on-surface hover:bg-surface-container"
+              aria-label="Dong quang cao"
+            >
+              x
+            </button>
+            <div className="grid gap-6 p-6 md:grid-cols-[1.2fr_1fr] md:items-center">
+              <div className="space-y-3">
+                <p className="text-xs uppercase tracking-[0.2em] text-primary font-bold">
+                  Suu tap doc quyen
+                </p>
+                <h2 className="font-headline text-3xl font-bold text-on-surface">
+                  Giam gia 40% cho phien dau gia dac biet
+                </h2>
+                <p className="text-sm text-on-surface-variant">
+                  Chi co hom nay. Nhan voucher va tham gia dau gia ngay de so
+                  huu nhung figure hiem nhat.
+                </p>
+                <div className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-white">
+                  MO NGAY
+                </div>
+              </div>
+              <img
+                alt="Quang cao lon"
+                className="h-56 w-full rounded-2xl object-cover md:h-64"
+                src="/images/hero.gif"
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
+      {visibleAds.left ? (
+        <aside className="fixed left-4 top-36 z-40 hidden xl:block">
+          <div className="relative w-56 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-xl">
+            <button
+              type="button"
+              onClick={() => handleCloseAd("left")}
+              className="absolute right-2 top-2 h-7 w-7 rounded-full border border-outline-variant/40 bg-white text-xs font-bold text-on-surface hover:bg-surface-container"
+              aria-label="Dong quang cao"
+            >
+              x
+            </button>
+            <div className="space-y-2 pt-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-primary font-bold">
+                Quang cao
+              </p>
+              <p className="text-sm text-on-surface-variant">
+                Bo suu tap figure moi ve, giam 30% cho don hang hom nay.
+              </p>
+              <img
+                alt="Quang cao figure"
+                className="w-full rounded-xl object-cover"
+                src="/images/img1.webp"
+              />
+            </div>
+          </div>
+        </aside>
+      ) : null}
+
+      {visibleAds.right ? (
+        <aside className="fixed right-4 top-52 z-40 hidden xl:block">
+          <div className="relative w-56 rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-4 shadow-xl">
+            <button
+              type="button"
+              onClick={() => handleCloseAd("right")}
+              className="absolute right-2 top-2 h-7 w-7 rounded-full border border-outline-variant/40 bg-white text-xs font-bold text-on-surface hover:bg-surface-container"
+              aria-label="Dong quang cao"
+            >
+              x
+            </button>
+            <div className="space-y-2 pt-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-secondary font-bold">
+                Flash deal
+              </p>
+              <p className="text-sm text-on-surface-variant">
+                Dau gia linh vat doc quyen, bat dau chi tu 199k.
+              </p>
+              <img
+                alt="Quang cao dau gia"
+                className="w-full rounded-xl object-cover"
+                src="/images/img2.webp"
+              />
+            </div>
+          </div>
+        </aside>
+      ) : null}
       <div className="flex items-center gap-2 text-sm text-on-surface-variant">
         <Link to="/" className="hover:text-primary">
           Trang chu

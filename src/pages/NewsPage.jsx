@@ -47,13 +47,15 @@ export default function NewsPage() {
   const featuredArticle = articles[0];
   const gridArticles = articles;
 
+  const resolveNewsSlug = (article) => article?.slug || article?.id;
+
   return (
     <main className="pt-24 pb-20 px-6 max-w-[1440px] mx-auto">
       <section className="mb-14">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {featuredArticle ? (
             <Link
-              to={`/news/${featuredArticle.id}`}
+              to={`/news/${resolveNewsSlug(featuredArticle)}`}
               className="group lg:col-span-8 rounded-2xl overflow-hidden bg-on-background text-white relative"
             >
               <img
@@ -164,7 +166,7 @@ export default function NewsPage() {
             gridArticles.map((article) => (
               <Link
                 key={article.id}
-                to={`/news/${article.id}`}
+                to={`/news/${resolveNewsSlug(article)}`}
                 className="rounded-2xl overflow-hidden bg-surface-container-lowest border border-outline-variant/30 hover:shadow-xl transition-shadow"
               >
                 <img
