@@ -12,6 +12,7 @@ import ExplorePage from "./pages/ExplorePage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import NewsPage from "./pages/NewsPage";
+import NewsDetailPage from "./pages/NewsDetailPage";
 import RegisterPage from "./pages/RegisterPage";
 import RootPage from "./pages/RootPage";
 import SellAuctionPage from "./pages/SellAuctionPage";
@@ -29,6 +30,7 @@ export default function App() {
 
           <Route path="explore" element={<ExplorePage />} />
           <Route path="news" element={<NewsPage />} />
+          <Route path="news/:id" element={<NewsDetailPage />} />
           <Route path="auction-detail" element={<AuctionDetailPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="admin/login" element={<AdminLoginPage />} />
